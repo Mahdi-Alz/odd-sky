@@ -1,0 +1,75 @@
+{
+  "app": {
+    "title": "Odd Sky",
+    "dataBy": "Weather data by",
+    "emptyState": "Search for a city to see its forecast"
+  },
+  "search": {
+    "placeholder": "Search for a city…",
+    "clear": "Clear search",
+    "noResults": "No places found.",
+    "error": "Couldn't reach the weather service. Try again."
+  },
+  "card": {
+    "remove": "Remove place",
+    "feelsLike": "Feels like",
+    "humidity": "Humidity",
+    "wind": "Wind",
+    "uv": "UV",
+    "today": "Today",
+    "loadError": "Couldn't load the forecast for this place.",
+    "localTime": "Local time"
+  },
+  "settings": {
+    "language": "Language",
+    "units": "Units",
+    "metric": "°C · km/h",
+    "imperial": "°F · mph",
+    "copyLink": "Copy transfer link",
+    "copied": "Link copied",
+    "copyFailed": "Couldn't copy the link"
+  },
+  "units": {
+    "kmh": "km/h",
+    "mph": "mph"
+  },
+  "facts": {
+    "warmestDay": "Warmest day in {years} years",
+    "coolestDay": "Coolest day in {years} years",
+    "warmestNight": "Warmest night in {years} years",
+    "coldestNight": "Coldest night in {years} years",
+    "wettestDay": "Wettest day in {years} years",
+    "footnote": "Compared with ERA5 reanalysis for the same calendar day over the past {years} years. Today's value is a forecast. Neither is an official station record."
+  },
+  "weather": {
+    "0": "Clear sky",
+    "1": "Mostly clear",
+    "2": "Partly cloudy",
+    "3": "Overcast",
+    "45": "Fog",
+    "48": "Freezing fog",
+    "51": "Light drizzle",
+    "53": "Drizzle",
+    "55": "Heavy drizzle",
+    "56": "Freezing drizzle",
+    "57": "Heavy freezing drizzle",
+    "61": "Light rain",
+    "63": "Rain",
+    "65": "Heavy rain",
+    "66": "Freezing rain",
+    "67": "Heavy freezing rain",
+    "71": "Light snow",
+    "73": "Snow",
+    "75": "Heavy snow",
+    "77": "Snow grains",
+    "80": "Light showers",
+    "81": "Showers",
+    "82": "Heavy showers",
+    "85": "Snow showers",
+    "86": "Heavy snow showers",
+    "95": "Thunderstorm",
+    "96": "Thunderstorm with hail",
+    "99": "Severe thunderstorm",
+    "unknown": "Unknown"
+  }
+}

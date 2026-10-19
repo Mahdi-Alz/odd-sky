@@ -1,27 +1,26 @@
 <script setup>
-import { ref } from "vue";
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import SearchInput from "./components/SearchInput.vue";
+import SettingsBar from "./components/SettingsBar.vue";
 import WeatherCard from "./components/WeatherCard.vue";
+import { useCityWeather } from "./composables/useCityWeather";
+import { useFormat } from "./composables/useFormat";
+import { useLocaleSync } from "./composables/useLocaleSync";
+import { useTransfer } from "./composables/useTransfer";
+import { useCitiesStore } from "./stores/cities";
+import { useSettingsStore } from "./stores/settings";
 
-const places = ref([]);
+const { t } = useI18n();
+const settings = useSettingsStore();
+const cities = useCitiesStore();
+const { formatLongDate } = useFormat();
+const { status: copyStatus, copyLink } = useTransfer();
+const { states } = useCityWeather(computed(() => cities.sorted));
 
-const placeKey = (data) => `${data.location.name}-${data.location.lat}-${data.location.lon}`;
+useLocaleSync();
 
-const addPlace = (data) => {
-  if (places.value.some((place) => placeKey(place) === placeKey(data))) return;
-  places.value.push(data);
-};
-
-const removePlace = (key) => {
-  places.value = places.value.filter((place) => placeKey(place) !== key);
-};
-
-const today = new Date().toLocaleDateString("en-us", {
-  weekday: "long",
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-});
+const today = computed(() => formatLongDate(new Date()));
 </script>
 
 <template>
@@ -30,21 +29,37 @@ const today = new Date().toLocaleDateString("en-us", {
       <!-- header -->
       <header class="mb-10 text-center">
         <h1 class="mt-2 font-display text-4xl font-bold tracking-tight text-primary/70 uppercase">
-          Odd Sky
+          {{ t("app.title") }}
         </h1>
         <p class="mt-2 text-sm text-base-content/50">{{ today }}</p>
       </header>
 
       <!-- search -->
-      <SearchInput @place-data="addPlace" />
+      <SearchInput @select="cities.add" />
+
+      <SettingsBar
+        :locale="settings.locale"
+        :units="settings.units"
+        :copy-status="copyStatus"
+        @update:locale="settings.setLocale"
+        @update:units="settings.setUnits"
+        @copy-link="copyLink"
+      />
 
       <!-- weather cards -->
-      <div v-if="places.length" class="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div
+        v-if="cities.sorted.length"
+        class="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+      >
         <WeatherCard
-          v-for="place in places"
-          :key="placeKey(place)"
+          v-for="place in cities.sorted"
+          :key="place.id"
           :place="place"
-          @remove="removePlace(placeKey(place))"
+          :forecast="states[place.id]?.forecast"
+          :facts="states[place.id]?.facts"
+          :loading="states[place.id]?.loading"
+          :error="states[place.id]?.error"
+          @remove="cities.remove(place.id)"
         />
       </div>
 
@@ -61,11 +76,11 @@ const today = new Date().toLocaleDateString("en-us", {
         >
           <path d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.7-1.8A4 4 0 0 0 6.5 16" />
         </svg>
-        <p class="text-sm">Search for a city to see its forecast</p>
+        <p class="text-sm">{{ t("app.emptyState") }}</p>
       </div>
 
       <footer class="mt-16 text-center text-xs text-base-content/40">
-        Weather data by
+        {{ t("app.dataBy") }}
         <a href="https://open-meteo.com/" target="_blank" rel="noopener" class="link link-hover"
           >Open-Meteo</a
         >

@@ -1,55 +1,17 @@
 <script setup>
-import { reactive } from "vue";
-import { getForecast, searchPlaces } from "../lib/openMeteo";
+import { useI18n } from "vue-i18n";
+import { useCitySearch } from "../composables/useCitySearch";
+import { useFormat } from "../composables/useFormat";
 
-const emit = defineEmits(["place-data"]);
+const emit = defineEmits(["select"]);
 
-const searchTerm = reactive({
-  query: "",
-  timeout: null,
-  results: null,
-  loading: false,
-  error: null,
-});
+const { t } = useI18n();
+const { listSeparator, placeDetail } = useFormat();
+const { query, results, loading, error, search, clear } = useCitySearch();
 
-const handleSearch = () => {
-  clearTimeout(searchTerm.timeout);
-  searchTerm.error = null;
-
-  if (!searchTerm.query.length) {
-    searchTerm.results = null;
-    searchTerm.loading = false;
-    return;
-  }
-
-  searchTerm.loading = true;
-  searchTerm.timeout = setTimeout(async () => {
-    try {
-      searchTerm.results = await searchPlaces(searchTerm.query);
-    } catch {
-      searchTerm.results = [];
-      searchTerm.error = "Couldn't reach the weather service. Try again.";
-    } finally {
-      searchTerm.loading = false;
-    }
-  }, 500);
-};
-
-const clearSearch = () => {
-  clearTimeout(searchTerm.timeout);
-  searchTerm.query = "";
-  searchTerm.results = null;
-  searchTerm.error = null;
-  searchTerm.loading = false;
-};
-
-const getWeather = async (place) => {
-  try {
-    emit("place-data", await getForecast(place));
-    clearSearch();
-  } catch {
-    searchTerm.error = "Couldn't reach the weather service. Try again.";
-  }
+const choose = (place) => {
+  emit("select", place);
+  clear();
 };
 </script>
 
@@ -73,23 +35,20 @@ const getWeather = async (place) => {
         </svg>
 
         <input
+          v-model="query"
           type="text"
-          placeholder="Search for a city…"
+          :placeholder="t('search.placeholder')"
           class="grow"
-          v-model="searchTerm.query"
-          @input="handleSearch"
+          @input="search"
         />
 
-        <span
-          v-if="searchTerm.loading"
-          class="loading loading-spinner loading-sm text-base-content/40"
-        ></span>
+        <span v-if="loading" class="loading loading-spinner loading-sm text-base-content/40"></span>
         <button
-          v-else-if="searchTerm.query"
+          v-else-if="query"
           type="button"
           class="btn btn-ghost btn-circle btn-xs text-base-content/50 hover:text-base-content"
-          @click="clearSearch"
-          aria-label="Clear search"
+          :aria-label="t('search.clear')"
+          @click="clear"
         >
           <svg
             viewBox="0 0 24 24"
@@ -106,20 +65,17 @@ const getWeather = async (place) => {
 
     <!-- search suggestions -->
     <ul
-      v-if="searchTerm.results !== null"
+      v-if="results !== null"
       class="menu absolute z-10 mt-2 w-full rounded-box border border-base-300 bg-base-200/95 p-2 shadow-xl shadow-black/30 backdrop-blur"
     >
-      <li v-if="searchTerm.error" class="px-3 py-2 text-sm text-error">
-        {{ searchTerm.error }}
+      <li v-if="error" class="px-3 py-2 text-sm text-error">
+        {{ t("search.error") }}
       </li>
-      <li
-        v-else-if="searchTerm.results.length === 0"
-        class="px-3 py-2 text-sm text-base-content/50"
-      >
-        No places found.
+      <li v-else-if="results.length === 0" class="px-3 py-2 text-sm text-base-content/50">
+        {{ t("search.noResults") }}
       </li>
-      <li v-for="place in searchTerm.results" :key="place.id">
-        <button type="button" class="rounded-field" @click="getWeather(place)">
+      <li v-for="place in results" :key="place.id">
+        <button type="button" class="rounded-field" @click="choose(place)">
           <svg
             class="size-4 shrink-0 text-base-content/40"
             viewBox="0 0 24 24"
@@ -135,10 +91,7 @@ const getWeather = async (place) => {
           <span class="truncate"
             >{{ place.name
             }}<span class="text-base-content/50">{{
-              [place.region, place.country]
-                .filter(Boolean)
-                .map((part) => ", " + part)
-                .join("")
+              placeDetail(place) ? listSeparator + placeDetail(place) : ""
             }}</span></span
           >
         </button>

@@ -4,65 +4,8 @@ const getJson = async (url) => {
   return res.json();
 };
 
-export const searchPlaces = async (query) => {
-  const params = new URLSearchParams({ name: query, count: "8", language: "en" });
-  const data = await getJson(`https://geocoding-api.open-meteo.com/v1/search?${params}`);
-  return (data.results ?? []).map((r) => ({
-    id: r.id,
-    name: r.name,
-    region: r.admin1 ?? "",
-    country: r.country ?? "",
-    lat: r.latitude,
-    lon: r.longitude,
-  }));
-};
-
 const DAILY_VARS =
   "temperature_2m_max,temperature_2m_min,precipitation_sum,snowfall_sum,wind_speed_10m_max,cloud_cover_mean";
-
-export const getForecast = async (place) => {
-  const params = new URLSearchParams({
-    latitude: place.lat,
-    longitude: place.lon,
-    current:
-      "temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day,uv_index",
-    daily: `weather_code,${DAILY_VARS}`,
-    forecast_days: "7",
-    timezone: "auto",
-  });
-  const data = await getJson(`https://api.open-meteo.com/v1/forecast?${params}`);
-  const { current, daily } = data;
-
-  return {
-    location: {
-      name: place.name,
-      region: place.region,
-      country: place.country,
-      lat: place.lat,
-      lon: place.lon,
-    },
-    current: {
-      temp: current.temperature_2m,
-      feelsLike: current.apparent_temperature,
-      humidity: current.relative_humidity_2m,
-      wind: current.wind_speed_10m,
-      uv: current.uv_index,
-      code: current.weather_code,
-      isDay: current.is_day === 1,
-    },
-    daily: daily.time.map((date, i) => ({
-      date,
-      code: daily.weather_code[i],
-      max: daily.temperature_2m_max[i],
-      min: daily.temperature_2m_min[i],
-      rain: daily.precipitation_sum[i],
-      snow: daily.snowfall_sum[i],
-      wind: daily.wind_speed_10m_max[i],
-      cloud: daily.cloud_cover_mean[i],
-    })),
-    localDate: daily.time[0],
-  };
-};
 
 const YEARS = 30;
 const WINDOW = 3;

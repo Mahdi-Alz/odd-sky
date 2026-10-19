@@ -8,12 +8,14 @@ Vue 3 weather app. Search cities, add cards, view current conditions + 7-day for
 - Multiple saved place cards
 - Current temp, feels-like, humidity, wind, UV
 - 7-day forecast per place
-- "How unusual is today?": today's high vs. the 30-year average for the same date, with warmest/coldest-in-30-years badges
+- "How unusual is today?" fact badges (placeholder data until the real fact engine lands)
+- English and Persian (RTL, Jalali dates), metric or imperial units
+- Saved cities persist in the browser and can be moved to another device with a transfer link
 - Dark theme UI (Tailwind + daisyUI)
 
 ## Tech Stack
 
-- Vue 3 (`<script setup>`)
+- Vue 3 (`<script setup>`), Pinia, vue-i18n
 - Vite
 - Tailwind CSS 4 + daisyUI
 
@@ -36,16 +38,17 @@ npm run preview
 ```
 apps/web/
   src/
-    App.vue                  # root layout, place list state
-    components/
-      SearchInput.vue        # city search + autocomplete
-      WeatherCard.vue        # weather display card
-      WeatherIcon.vue        # inline SVG icons per condition
-    lib/
-      openMeteo.js           # geocoding, forecast, climate history
-      weatherCodes.js        # WMO code -> label/icon
+    App.vue                  # root layout
+    components/              # presentational components
+    composables/             # UI logic and state
+    stores/                  # Pinia stores (cities, settings)
+    services/                # Open-Meteo network calls
+    storage/                 # IndexedDB, cache, transfer link
+    i18n/                    # fa and en messages
     assets/css/style.css
 packages/core/
+  dates/ units/ weather/     # pure helpers
+  facts/                     # fact contracts and mock
   types.js                   # shared JSDoc contracts
 ```
 

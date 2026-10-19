@@ -48,8 +48,6 @@
  * @property {number} snow
  * @property {number} wind
  * @property {number} cloud
- * @property {string} sunrise
- * @property {string} sunset
  */
 
 /**
@@ -75,7 +73,6 @@
  * @property {string} timezone
  * @property {string} localDate
  * @property {Current} current
- * @property {HourlyPoint[]} hourly
  * @property {DailyPoint[]} daily
  */
 
