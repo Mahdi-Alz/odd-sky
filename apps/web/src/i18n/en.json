@@ -204,13 +204,11 @@
     "goTo": "Go to city {n}"
   },
   "list": {
-    "title": "Weather",
     "open": "Cities",
     "close": "Back to forecast",
     "edit": "Edit",
     "done": "Done",
-    "moveUp": "Move up",
-    "moveDown": "Move down"
+    "reorder": "Move {name}. Use the up and down arrow keys."
   },
   "page": {
     "hourly": "Hourly forecast",

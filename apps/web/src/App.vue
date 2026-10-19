@@ -28,7 +28,7 @@ const { status: copyStatus, copyLink } = useTransfer();
 const { show: showInstallHint, dismiss: dismissInstallHint } = useInstallHint();
 const { states, refresh, ready } = useCityWeather(places);
 
-useLocaleSync();
+const { setLocale } = useLocaleSync();
 useCityLabels();
 useRefreshPolicy({
   places,
@@ -85,29 +85,33 @@ const addCity = (place) => {
       </template>
     </CityPager>
 
-    <CityList
-      v-if="view === 'list' || view === 'settings'"
-      :places="places"
-      :states="states"
-      @select="selectCity"
-      @add="addCity"
-      @remove="cities.remove"
-      @move="cities.move"
-      @open-settings="nav.open('settings')"
-      @close="nav.back()"
-    />
+    <Transition name="view-fade">
+      <CityList
+        v-if="view === 'list' || view === 'settings'"
+        :places="places"
+        :states="states"
+        @select="selectCity"
+        @add="addCity"
+        @remove="cities.remove"
+        @reorder="cities.reorder"
+        @open-settings="nav.open('settings')"
+        @close="nav.back()"
+      />
+    </Transition>
 
-    <SettingsScreen
-      v-if="view === 'settings'"
-      :locale="settings.locale"
-      :units="settings.units"
-      :copy-status="copyStatus"
-      :activities="activityOptions"
-      @update:locale="settings.setLocale"
-      @update:units="settings.setUnits"
-      @set-activity="settings.setActivity"
-      @copy-link="copyLink"
-      @close="nav.back()"
-    />
+    <Transition name="view-slide">
+      <SettingsScreen
+        v-if="view === 'settings'"
+        :locale="settings.locale"
+        :units="settings.units"
+        :copy-status="copyStatus"
+        :activities="activityOptions"
+        @update:locale="setLocale"
+        @update:units="settings.setUnits"
+        @set-activity="settings.setActivity"
+        @copy-link="copyLink"
+        @close="nav.back()"
+      />
+    </Transition>
   </main>
 </template>

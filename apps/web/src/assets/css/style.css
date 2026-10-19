@@ -18,6 +18,20 @@
 }
 
 @layer base {
+  :root {
+    --motion-fast: 150ms;
+    --motion-move: 220ms;
+    --motion-view: 240ms;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --motion-fast: 0s;
+      --motion-move: 0s;
+      --motion-view: 0s;
+    }
+  }
+
   html {
     color-scheme: dark;
     background: var(--color-ink);
@@ -122,4 +136,54 @@
   .safe-bottom {
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
+}
+
+@layer components {
+  .list-enter-active,
+  .list-leave-active {
+    transition:
+      opacity var(--motion-move) ease-out,
+      transform var(--motion-move) ease-out;
+  }
+  .list-leave-active {
+    position: absolute;
+    inset-inline: 0;
+  }
+  .list-enter-from,
+  .list-leave-to {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  .list-move {
+    transition: transform var(--motion-move) ease-out;
+  }
+
+  .view-fade-enter-active,
+  .view-fade-leave-active,
+  .view-slide-enter-active,
+  .view-slide-leave-active {
+    transition:
+      opacity var(--motion-view) ease-out,
+      transform var(--motion-view) ease-out;
+  }
+  .view-fade-enter-from,
+  .view-fade-leave-to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  .view-slide-enter-from,
+  .view-slide-leave-to {
+    opacity: 0;
+    transform: translateX(1.5rem);
+  }
+  [dir="rtl"] .view-slide-enter-from,
+  [dir="rtl"] .view-slide-leave-to {
+    transform: translateX(-1.5rem);
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--motion-view);
+  animation-timing-function: ease-out;
 }

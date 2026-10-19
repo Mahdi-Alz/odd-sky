@@ -33,11 +33,9 @@ export const useCitiesStore = defineStore("cities", {
           : item,
       );
     },
-    move(id, delta) {
+    reorder(from, to) {
       const list = this.sorted;
-      const from = list.findIndex((item) => item.id === id);
-      const to = from + delta;
-      if (from === -1 || to < 0 || to >= list.length) return;
+      if (from === to || from < 0 || to < 0 || from >= list.length || to >= list.length) return;
       const [moved] = list.splice(from, 1);
       list.splice(to, 0, moved);
       this.items = list.map((item, order) => ({ ...item, order }));

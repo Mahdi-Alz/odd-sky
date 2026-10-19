@@ -31,20 +31,23 @@ describe("cities store", () => {
     expect(store.sorted.map((item) => item.order)).toEqual([0, 1, 2]);
   });
 
-  it("moves a city up and down and renumbers", () => {
+  it("moves a city to a new position and renumbers", () => {
     const store = seeded();
-    store.move("c", -1);
-    expect(order(store)).toEqual(["a", "c", "b"]);
-    store.move("a", 1);
+    store.reorder(2, 0);
     expect(order(store)).toEqual(["c", "a", "b"]);
+    store.reorder(0, 1);
+    expect(order(store)).toEqual(["a", "c", "b"]);
+    store.reorder(0, 2);
+    expect(order(store)).toEqual(["c", "b", "a"]);
     expect(store.sorted.map((item) => item.order)).toEqual([0, 1, 2]);
   });
 
-  it("ignores moves past either end and unknown ids", () => {
+  it("ignores moves out of range or to the same place", () => {
     const store = seeded();
-    store.move("a", -1);
-    store.move("c", 1);
-    store.move("zzz", 1);
+    store.reorder(0, -1);
+    store.reorder(2, 3);
+    store.reorder(5, 0);
+    store.reorder(1, 1);
     expect(order(store)).toEqual(["a", "b", "c"]);
   });
 

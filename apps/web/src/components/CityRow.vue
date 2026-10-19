@@ -10,10 +10,9 @@ const props = defineProps({
   place: { type: Object, required: true },
   forecast: { type: Object, default: null },
   editing: { type: Boolean, default: false },
-  first: { type: Boolean, default: false },
-  last: { type: Boolean, default: false },
+  lifted: { type: Boolean, default: false },
 });
-const emit = defineEmits(["select", "remove", "move"]);
+const emit = defineEmits(["select", "remove"]);
 
 const { t } = useI18n();
 const { formatTemp, placeDetail } = useFormat();
@@ -42,7 +41,8 @@ const today = computed(() => props.forecast?.daily[0] ?? null);
 
     <button
       type="button"
-      class="sky flex min-w-0 rounded-card border border-line flex-1 items-center justify-between gap-3 p-4 text-start"
+      class="sky flex min-w-0 flex-1 items-center justify-between gap-3 rounded-card border border-line p-4 text-start transition-[scale,box-shadow] duration-(--motion-fast) ease-out"
+      :class="lifted ? 'scale-[1.02] shadow-xl shadow-black/40' : ''"
       :data-sky="sky"
       :disabled="editing"
       @click="emit('select')"
@@ -65,25 +65,14 @@ const today = computed(() => props.forecast?.daily[0] ?? null);
       </span>
     </button>
 
-    <div v-if="editing" class="flex shrink-0 flex-col gap-1">
-      <button
-        type="button"
-        class="grid size-8 place-items-center rounded-lg bg-white/10 disabled:opacity-30"
-        :disabled="first"
-        :aria-label="t('list.moveUp')"
-        @click="emit('move', -1)"
-      >
-        <UiIcon name="up" class="size-4" />
-      </button>
-      <button
-        type="button"
-        class="grid size-8 place-items-center rounded-lg bg-white/10 disabled:opacity-30"
-        :disabled="last"
-        :aria-label="t('list.moveDown')"
-        @click="emit('move', 1)"
-      >
-        <UiIcon name="down" class="size-4" />
-      </button>
-    </div>
+    <button
+      v-if="editing"
+      type="button"
+      data-drag-handle
+      class="grid size-10 shrink-0 cursor-grab touch-none place-items-center rounded-lg text-white/70 select-none hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-2 focus-visible:outline-white/60 active:cursor-grabbing"
+      :aria-label="t('list.reorder', { name: place.name })"
+    >
+      <UiIcon name="grip" class="size-5" />
+    </button>
   </li>
 </template>

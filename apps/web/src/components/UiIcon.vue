@@ -30,8 +30,7 @@ defineProps({
     </template>
     <path v-else-if="name === 'close'" d="M18 6 6 18M6 6l12 12" />
     <path v-else-if="name === 'back'" d="m15 18-6-6 6-6" />
-    <path v-else-if="name === 'up'" d="m18 15-6-6-6 6" />
-    <path v-else-if="name === 'down'" d="m6 9 6 6 6-6" />
+    <path v-else-if="name === 'grip'" d="M4 7h16M4 12h16M4 17h16" />
     <template v-else-if="name === 'trash'">
       <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
       <path d="M10 11v5M14 11v5" />
