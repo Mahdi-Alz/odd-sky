@@ -1,13 +1,14 @@
 # Odd Sky
 
-Vue 3 weather app. Search cities, add cards, view current conditions + 3-day forecast. Data from [WeatherAPI](https://www.weatherapi.com/).
+Vue 3 weather app. Search cities, add cards, view current conditions + 7-day forecast, and see how today compares to the last 30 years. Weather data by [Open-Meteo](https://open-meteo.com/), no API key needed.
 
 ## Features
 
 - City search with debounced autocomplete
 - Multiple saved place cards
 - Current temp, feels-like, humidity, wind, UV
-- 3-day forecast per place
+- 7-day forecast per place
+- "How unusual is today?": today's high vs. the 30-year average for the same date, with warmest/coldest-in-30-years badges
 - Dark theme UI (Tailwind + daisyUI)
 
 ## Tech Stack
@@ -20,12 +21,6 @@ Vue 3 weather app. Search cities, add cards, view current conditions + 3-day for
 
 ```sh
 npm install
-cp .env.example .env
-```
-
-Set `VITE_WEATHER_API_KEY` in `.env` to your [WeatherAPI](https://www.weatherapi.com/) key, then:
-
-```sh
 npm run dev
 ```
 
@@ -39,10 +34,19 @@ npm run preview
 ## Project Structure
 
 ```
-src/
-  App.vue                    # root layout, place list state
-  components/
-    SearchInput.vue          # city search + autocomplete
-    WeatherCard.vue          # weather display card
-  assets/css/style.css
+apps/web/
+  src/
+    App.vue                  # root layout, place list state
+    components/
+      SearchInput.vue        # city search + autocomplete
+      WeatherCard.vue        # weather display card
+      WeatherIcon.vue        # inline SVG icons per condition
+    lib/
+      openMeteo.js           # geocoding, forecast, climate history
+      weatherCodes.js        # WMO code -> label/icon
+    assets/css/style.css
+packages/core/
+  types.js                   # shared JSDoc contracts
 ```
+
+Other scripts, all from the repo root: `npm test`, `npm run lint`, `npm run typecheck`, `npm run format`.

@@ -5,8 +5,7 @@ import WeatherCard from "./components/WeatherCard.vue";
 
 const places = ref([]);
 
-const placeKey = (data) =>
-  `${data.location.name}-${data.location.lat}-${data.location.lon}`;
+const placeKey = (data) => `${data.location.name}-${data.location.lat}-${data.location.lon}`;
 
 const addPlace = (data) => {
   if (places.value.some((place) => placeKey(place) === placeKey(data))) return;
@@ -30,7 +29,9 @@ const today = new Date().toLocaleDateString("en-us", {
     <div class="mx-auto max-w-5xl">
       <!-- header -->
       <header class="mb-10 text-center">
-        <h1 class="mt-2 font-display text-4xl font-bold tracking-tight text-primary/70 uppercase">Odd Sky</h1>
+        <h1 class="mt-2 font-display text-4xl font-bold tracking-tight text-primary/70 uppercase">
+          Odd Sky
+        </h1>
         <p class="mt-2 text-sm text-base-content/50">{{ today }}</p>
       </header>
 
@@ -49,11 +50,26 @@ const today = new Date().toLocaleDateString("en-us", {
 
       <!-- empty state -->
       <div v-else class="mt-20 flex flex-col items-center gap-3 text-center text-base-content/40">
-        <svg class="size-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          class="size-10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.7-1.8A4 4 0 0 0 6.5 16" />
         </svg>
         <p class="text-sm">Search for a city to see its forecast</p>
       </div>
+
+      <footer class="mt-16 text-center text-xs text-base-content/40">
+        Weather data by
+        <a href="https://open-meteo.com/" target="_blank" rel="noopener" class="link link-hover"
+          >Open-Meteo</a
+        >
+      </footer>
     </div>
   </main>
 </template>

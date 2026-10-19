@@ -1,9 +1,8 @@
 <script setup>
 import { reactive } from "vue";
+import { getForecast, searchPlaces } from "../lib/openMeteo";
 
 const emit = defineEmits(["place-data"]);
-
-const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 
 const searchTerm = reactive({
   query: "",
@@ -26,11 +25,7 @@ const handleSearch = () => {
   searchTerm.loading = true;
   searchTerm.timeout = setTimeout(async () => {
     try {
-      const res = await fetch(
-        `https://api.weatherapi.com/v1/search.json?key=${API_KEY}&q=${encodeURIComponent(searchTerm.query)}`,
-      );
-      if (!res.ok) throw new Error("search failed");
-      searchTerm.results = await res.json();
+      searchTerm.results = await searchPlaces(searchTerm.query);
     } catch {
       searchTerm.results = [];
       searchTerm.error = "Couldn't reach the weather service. Try again.";
@@ -48,13 +43,13 @@ const clearSearch = () => {
   searchTerm.loading = false;
 };
 
-const getWeather = async (id) => {
-  const res = await fetch(
-    `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=id:${id}&days=3&aqi=no&alerts=no`,
-  );
-  const data = await res.json();
-  emit("place-data", data);
-  clearSearch();
+const getWeather = async (place) => {
+  try {
+    emit("place-data", await getForecast(place));
+    clearSearch();
+  } catch {
+    searchTerm.error = "Couldn't reach the weather service. Try again.";
+  }
 };
 </script>
 
@@ -85,7 +80,10 @@ const getWeather = async (id) => {
           @input="handleSearch"
         />
 
-        <span v-if="searchTerm.loading" class="loading loading-spinner loading-sm text-base-content/40"></span>
+        <span
+          v-if="searchTerm.loading"
+          class="loading loading-spinner loading-sm text-base-content/40"
+        ></span>
         <button
           v-else-if="searchTerm.query"
           type="button"
@@ -93,7 +91,13 @@ const getWeather = async (id) => {
           @click="clearSearch"
           aria-label="Clear search"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          >
             <path d="M18 6 6 18M6 6l12 12" />
           </svg>
         </button>
@@ -108,11 +112,14 @@ const getWeather = async (id) => {
       <li v-if="searchTerm.error" class="px-3 py-2 text-sm text-error">
         {{ searchTerm.error }}
       </li>
-      <li v-else-if="searchTerm.results.length === 0" class="px-3 py-2 text-sm text-base-content/50">
+      <li
+        v-else-if="searchTerm.results.length === 0"
+        class="px-3 py-2 text-sm text-base-content/50"
+      >
         No places found.
       </li>
       <li v-for="place in searchTerm.results" :key="place.id">
-        <button type="button" class="rounded-field" @click="getWeather(place.id)">
+        <button type="button" class="rounded-field" @click="getWeather(place)">
           <svg
             class="size-4 shrink-0 text-base-content/40"
             viewBox="0 0 24 24"
@@ -125,7 +132,15 @@ const getWeather = async (id) => {
             <path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11Z" />
             <circle cx="12" cy="10" r="2.5" />
           </svg>
-          <span class="truncate">{{ place.name }}<span class="text-base-content/50">, {{ place.region }}, {{ place.country }}</span></span>
+          <span class="truncate"
+            >{{ place.name
+            }}<span class="text-base-content/50">{{
+              [place.region, place.country]
+                .filter(Boolean)
+                .map((part) => ", " + part)
+                .join("")
+            }}</span></span
+          >
         </button>
       </li>
     </ul>
