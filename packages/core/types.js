@@ -28,11 +28,13 @@
  * @property {number} temp
  * @property {number} apparentTemp
  * @property {number} wind
+ * @property {number} gusts
  * @property {number} precipProbability
  * @property {number} precipAmount
  * @property {number} uv
  * @property {number} humidity
  * @property {number} cloud
+ * @property {number} radiation
  * @property {number} code
  * @property {boolean} isDay
  */
@@ -150,7 +152,7 @@
  */
 
 /**
- * @typedef {'temp' | 'apparentTemp' | 'wind' | 'precipProbability' | 'precipAmount' | 'uv' | 'humidity' | 'cloud' | 'thunder'} FactorSource
+ * @typedef {'temp' | 'apparentTemp' | 'wind' | 'gusts' | 'precipProbability' | 'precipAmount' | 'uv' | 'humidity' | 'cloud' | 'thunder' | 'fog' | 'freezing' | 'snow' | 'daylight' | 'dewPoint' | 'evaporation' | 'moon'} FactorSource
  */
 
 /**

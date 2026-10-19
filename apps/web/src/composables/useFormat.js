@@ -86,8 +86,11 @@ export const useFormat = () => {
 
   const activityReason = (reason) => t(`activities.reasons.${reason.factor}.${reason.side}`);
 
-  const formatWindow = (window) =>
-    t("activities.best", { from: formatHour(window.start), to: formatHour(window.end) });
+  const formatWindow = (window, tomorrow = false) =>
+    t(tomorrow ? "activities.bestTomorrow" : "activities.best", {
+      from: formatHour(window.start),
+      to: formatHour(window.end),
+    });
 
   const factsFootnote = (years) => t("facts.footnote", { years: formatNumber(years) });
 

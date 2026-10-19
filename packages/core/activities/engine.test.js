@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { SCORING } from "../config/activities.js";
 import {
   addHour,
   headlineReasons,
@@ -25,11 +26,13 @@ const hour = (index, overrides = {}) => {
     temp: 20,
     apparentTemp: 20,
     wind: 10,
+    gusts: 15,
     precipProbability: 0,
     precipAmount: 0,
     uv: 3,
     humidity: 40,
     cloud: 10,
+    radiation: h >= 6 && h < 18 ? 500 : 0,
     code: 0,
     isDay: h >= 6 && h < 18,
     ...overrides,
@@ -452,5 +455,62 @@ describe("scoreActivities", () => {
   it("uses the shipped activities by default", () => {
     const results = scoreActivities(hours, DATE);
     expect(results.map((r) => r.activity)).toContain("carWash");
+  });
+});
+
+describe("bad factor drag", () => {
+  const activity = probe({
+    factors: [
+      { source: "temp", weight: 4, ideal: [10, 20], ok: [0, 30] },
+      { source: "wind", weight: 1, ideal: [LOW, 10], ok: [LOW, 30] },
+    ],
+  });
+
+  it("pulls the score below the weighted mean when a heavy factor is bad", () => {
+    const result = scoreActivity(
+      activity,
+      series(1, 0, () => ({ temp: 40, wind: 0 })),
+      DATE,
+    );
+    expect(result.score).toBe(0);
+  });
+
+  it("drags less for a light factor", () => {
+    const result = scoreActivity(
+      activity,
+      series(1, 0, () => ({ temp: 15, wind: 60 })),
+      DATE,
+    );
+    expect(result.score).toBe(Math.round(80 - 0.25 * 50 * SCORING.badFactorDrag));
+  });
+
+  it("does not drag factors inside their ok range", () => {
+    const result = scoreActivity(
+      activity,
+      series(1, 0, () => ({ temp: 15, wind: 30 })),
+      DATE,
+    );
+    expect(result.score).toBe(90);
+  });
+});
+
+describe("lead time", () => {
+  it("prefers a sooner window when scores are close", () => {
+    const hours = series(24, 0, (i) => ({ temp: i === 20 ? 15 : 20.5 }));
+    const result = scoreActivity(probe({ horizon: 24 }), hours, DATE);
+    expect(result.window?.start).toBe("2026-10-19T00:00");
+  });
+
+  it("still picks a much better window later on", () => {
+    const hours = series(24, 0, (i) => ({ temp: i === 20 ? 15 : 28 }));
+    const result = scoreActivity(probe({ horizon: 24 }), hours, DATE);
+    expect(result.window?.start).toBe("2026-10-19T20:00");
+    expect(result.score).toBe(100);
+  });
+
+  it("finds tomorrow's window late in the evening with a rolling horizon", () => {
+    const hours = series(24, 21);
+    const result = scoreActivity(probe({ horizon: 24, light: "day" }), hours, DATE);
+    expect(result.window?.start).toBe("2026-10-20T06:00");
   });
 });

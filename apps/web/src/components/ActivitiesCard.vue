@@ -46,7 +46,7 @@ const dots = (score) => {
 
         <p class="mt-2 text-sm leading-snug text-white/70">
           <template v-if="row.window"
-            ><bdi>{{ formatWindow(row.window) }}</bdi> ·
+            ><bdi>{{ formatWindow(row.window, row.tomorrow) }}</bdi> ·
           </template>
           <template v-else-if="row.whole">{{ t("activities.horizon") }} · </template>
           {{ row.headline.map(activityReason).join(" · ") }}

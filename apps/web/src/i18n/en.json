@@ -53,6 +53,7 @@
   "activities": {
     "title": "Activities",
     "best": "Best {from} – {to}",
+    "bestTomorrow": "Best tomorrow {from} – {to}",
     "horizon": "Next 2 days",
     "footnote": "Scores come from the hourly forecast and are only a rough guide.",
     "names": {
@@ -117,19 +118,54 @@
         "above": "Thunderstorms expected"
       },
       "daylight": {
-        "below": "No daylight left today",
+        "below": "After dark",
         "within": "Daylight",
         "above": "Daylight"
       },
       "darkness": {
-        "below": "No dark hours left today",
+        "below": "No dark hours in the next 24 hours",
         "within": "Dark sky",
         "above": "Dark sky"
       },
       "time": {
-        "below": "Not enough time left today",
+        "below": "Not enough time in the forecast",
         "within": "Enough time",
         "above": "Enough time"
+      },
+      "gusts": {
+        "below": "No strong gusts",
+        "within": "No strong gusts",
+        "above": "Strong gusts"
+      },
+      "dewPoint": {
+        "below": "Dry air",
+        "within": "Comfortable air",
+        "above": "Muggy air"
+      },
+      "evaporation": {
+        "below": "Slow drying",
+        "within": "Fast drying",
+        "above": "Fast drying"
+      },
+      "fog": {
+        "below": "Good visibility",
+        "within": "Good visibility",
+        "above": "Fog likely"
+      },
+      "snow": {
+        "below": "No snow",
+        "within": "No snow",
+        "above": "Snow expected"
+      },
+      "freezing": {
+        "below": "No freezing rain",
+        "within": "No freezing rain",
+        "above": "Freezing rain expected"
+      },
+      "moon": {
+        "below": "Faint moon",
+        "within": "Faint moon",
+        "above": "Bright moon"
       }
     }
   },

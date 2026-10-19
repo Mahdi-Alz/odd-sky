@@ -1,18 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { ACTIVITIES, LABEL_BOUNDS } from "../config/activities.js";
+import { FACTOR_SOURCES } from "./derive.js";
 import { scoreActivity } from "./engine.js";
 
-const WEIGHT_SOURCES = new Set([
-  "temp",
-  "apparentTemp",
-  "wind",
-  "precipProbability",
-  "precipAmount",
-  "uv",
-  "humidity",
-  "cloud",
-  "thunder",
-]);
+const WEIGHT_SOURCES = new Set(FACTOR_SOURCES);
 
 describe("activity config", () => {
   it("has unique ids", () => {
@@ -78,11 +69,13 @@ const hours = (count, make) =>
       temp: 20,
       apparentTemp: 20,
       wind: 10,
+      gusts: 15,
       precipProbability: 0,
       precipAmount: 0,
       uv: 3,
       humidity: 40,
       cloud: 10,
+      radiation: h >= 6 && h < 18 ? 500 : 0,
       code: 0,
       isDay: h >= 6 && h < 18,
       ...make(i),
@@ -145,5 +138,95 @@ describe("shipped activities", () => {
     const wetMorning = hours(24, (i) => (i < 12 ? { precipProbability: 90, precipAmount: 1 } : {}));
     const result = scoreActivity(find("laundry"), wetMorning, "2026-10-19");
     expect((result.window?.start ?? "") >= "2026-10-19T12:00").toBe(true);
+  });
+});
+
+describe("realistic conditions", () => {
+  /** @param {number} i */
+  const isDay = (i) => i % 24 >= 6 && i % 24 < 18;
+
+  it("does not rule out running after dark", () => {
+    const evening = hours(48, () => ({ isDay: false, radiation: 0, uv: 0 })).slice(20, 44);
+    const result = scoreActivity(find("running"), evening, "2026-10-19");
+    expect(result.score).toBeGreaterThan(60);
+  });
+
+  it("rates the dark lower than daylight for hiking", () => {
+    const day = scoreActivity(
+      find("hiking"),
+      hours(24, () => ({})),
+      "2026-10-19",
+    );
+    const dark = scoreActivity(
+      find("hiking"),
+      hours(24, () => ({ isDay: false, radiation: 0 })),
+      "2026-10-19",
+    );
+    expect(dark.score).toBeLessThan(day.score - 20);
+    expect(dark.score).toBeGreaterThan(0);
+  });
+
+  it("scores laundry on drying power, not daylight alone", () => {
+    const sunnyDry = hours(24, () => ({}));
+    const greyHumid = hours(24, (i) => ({
+      humidity: 88,
+      cloud: 100,
+      wind: 4,
+      radiation: isDay(i) ? 120 : 0,
+    }));
+    const windyNight = hours(24, () => ({
+      isDay: false,
+      radiation: 0,
+      humidity: 30,
+      wind: 25,
+      temp: 22,
+    }));
+    const sunny = scoreActivity(find("laundry"), sunnyDry, "2026-10-19");
+    const grey = scoreActivity(find("laundry"), greyHumid, "2026-10-19");
+    const windy = scoreActivity(find("laundry"), windyNight, "2026-10-19");
+    expect(sunny.label).toBe("great");
+    expect(grey.score).toBeLessThan(40);
+    expect(windy.score).toBeGreaterThan(grey.score);
+    expect(windy.score).toBeGreaterThan(0);
+  });
+
+  it("marks muggy air as a problem for running", () => {
+    const muggy = hours(24, () => ({ temp: 29, apparentTemp: 24, humidity: 85 }));
+    const result = scoreActivity(find("running"), muggy, "2026-10-19");
+    expect(result.reasons[0].factor).toBe("dewPoint");
+  });
+
+  it("penalises gusts for cycling", () => {
+    const calm = scoreActivity(
+      find("cycling"),
+      hours(24, () => ({})),
+      "2026-10-19",
+    );
+    const gusty = scoreActivity(
+      find("cycling"),
+      hours(24, () => ({ gusts: 55 })),
+      "2026-10-19",
+    );
+    expect(gusty.score).toBeLessThan(calm.score - 15);
+  });
+
+  it("vetoes freezing rain for running and cycling", () => {
+    const ice = hours(48, () => ({ code: 66 }));
+    for (const id of ["running", "cycling"]) {
+      expect(scoreActivity(find(id), ice, "2026-10-19").score, id).toBe(0);
+    }
+  });
+
+  it("rates a full moon night lower for stargazing", () => {
+    /** @param {number} day */
+    const night = (day) =>
+      hours(24, (i) => ({
+        time: `2026-${day < 0 ? "10-26" : "11-09"}T${String(i).padStart(2, "0")}:00`,
+        cloud: 5,
+      }));
+    const full = scoreActivity(find("stargazing"), night(-1), "2026-10-26");
+    const fresh = scoreActivity(find("stargazing"), night(1), "2026-11-09");
+    expect(full.score).toBeLessThan(fresh.score);
+    expect(full.reasons[0].factor).toBe("moon");
   });
 });

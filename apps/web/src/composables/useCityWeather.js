@@ -4,7 +4,7 @@ import { getFacts } from "../services/factsService";
 import { getForecast } from "../services/forecastService";
 import { cache } from "../storage";
 
-const forecastKey = (place) => `forecast:v3:${place.id}`;
+const forecastKey = (place) => `forecast:v4:${place.id}`;
 
 const loadFacts = async (place, state) => {
   const { localDate, timezone } = state.forecast;

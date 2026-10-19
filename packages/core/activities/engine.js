@@ -1,6 +1,5 @@
-import { ACTIVITIES, LABEL_BOUNDS } from "../config/activities.js";
-
-const THUNDER_FROM = 95;
+import { ACTIVITIES, LABEL_BOUNDS, SCORING } from "../config/activities.js";
+import { readSource } from "./derive.js";
 
 /** @typedef {import("../types").HourlyPoint} HourlyPoint */
 /** @typedef {import("../types").ActivityConfig} ActivityConfig */
@@ -10,16 +9,6 @@ const THUNDER_FROM = 95;
 /** @typedef {import("../types").ActivityScore} ActivityScore */
 /** @typedef {import("../types").Aggregate} Aggregate */
 /** @typedef {import("../types").FactorSource} FactorSource */
-
-/**
- * @param {HourlyPoint} hour
- * @param {FactorSource} source
- * @returns {number}
- */
-const readSource = (hour, source) => {
-  if (source === "thunder") return hour.code >= THUNDER_FROM ? 1 : 0;
-  return hour[source];
-};
 
 /**
  * @param {number[]} values
@@ -96,7 +85,8 @@ const isVetoed = (veto, hours) => {
 const scoreWindow = (factors, hours) => {
   let weighted = 0;
   let weights = 0;
-  /** @type {{ reason: ActivityReason, weight: number }[]} */
+  let heaviest = 0;
+  /** @type {{ reason: ActivityReason, weight: number, score: number }[]} */
   const parts = [];
   for (const factor of factors) {
     const value = aggregateSource(hours, factor.source, factor.aggregate ?? "mean");
@@ -104,14 +94,24 @@ const scoreWindow = (factors, hours) => {
     const result = scoreRange(value, factor.ideal, factor.ok);
     weighted += result.score * factor.weight;
     weights += factor.weight;
+    heaviest = Math.max(heaviest, factor.weight);
     parts.push({
       reason: { factor: factor.source, level: result.level, side: result.side, value },
       weight: factor.weight,
+      score: result.score,
     });
   }
   const order = { bad: 0, ok: 1, ideal: 2 };
   parts.sort((a, b) => order[a.reason.level] - order[b.reason.level] || b.weight - a.weight);
-  return { score: weights ? weighted / weights : 0, reasons: parts.map((part) => part.reason) };
+  if (!weights) return { score: 0, reasons: [] };
+  const drag = Math.max(
+    0,
+    ...parts.map(
+      (part) => (part.weight / heaviest) * Math.max(0, 50 - part.score) * SCORING.badFactorDrag,
+    ),
+  );
+  const score = Math.min(100, Math.max(0, weighted / weights - drag));
+  return { score, reasons: parts.map((part) => part.reason) };
 };
 
 /** @param {string} localIso */
@@ -165,14 +165,16 @@ export const scoreActivity = (activity, hours, localDate) => {
 
   if (!length || pool.length < length) return unavailable(activity.id, "time", pool.length);
 
-  /** @type {HourlyPoint[][]} */
+  /** @type {{ hours: HourlyPoint[], lead: number }[]} */
   const windows = [];
   if (whole) {
-    if (pool.every((hour) => matchesLight(hour, activity.light))) windows.push(pool);
+    if (pool.every((hour) => matchesLight(hour, activity.light)))
+      windows.push({ hours: pool, lead: 0 });
   } else {
     for (let start = 0; start + length <= pool.length; start += 1) {
       const slice = pool.slice(start, start + length);
-      if (slice.every((hour) => matchesLight(hour, activity.light))) windows.push(slice);
+      if (slice.every((hour) => matchesLight(hour, activity.light)))
+        windows.push({ hours: slice, lead: start });
     }
   }
 
@@ -183,16 +185,17 @@ export const scoreActivity = (activity, hours, localDate) => {
 
   /** @type {Map<number, number>} */
   const vetoCounts = new Map();
-  /** @type {{ score: number, reasons: ActivityReason[], hours: HourlyPoint[] } | null} */
+  /** @type {{ score: number, rank: number, reasons: ActivityReason[], hours: HourlyPoint[] } | null} */
   let best = null;
   for (const window of windows) {
-    const vetoIndex = activity.vetoes.findIndex((veto) => isVetoed(veto, window));
+    const vetoIndex = activity.vetoes.findIndex((veto) => isVetoed(veto, window.hours));
     if (vetoIndex >= 0) {
       vetoCounts.set(vetoIndex, (vetoCounts.get(vetoIndex) ?? 0) + 1);
       continue;
     }
-    const result = scoreWindow(activity.factors, window);
-    if (!best || result.score > best.score) best = { ...result, hours: window };
+    const result = scoreWindow(activity.factors, window.hours);
+    const rank = result.score - SCORING.leadPenaltyPerHour * window.lead;
+    if (!best || rank > best.rank) best = { ...result, rank, hours: window.hours };
   }
 
   if (!best) {
