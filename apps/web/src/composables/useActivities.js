@@ -12,10 +12,9 @@ export const useActivities = (forecast) => {
       .map((result, index) => ({
         ...result,
         id: result.activity,
-        whole:
-          ACTIVITIES.find((activity) => activity.id === result.activity)?.durationHours == null,
+        hours:
+          ACTIVITIES.find((activity) => activity.id === result.activity)?.durationHours ?? null,
         headline: headlineReasons(result),
-        tomorrow: Boolean(result.window && !result.window.start.startsWith(value.localDate)),
         index,
       }))
       .sort((a, b) => b.score - a.score || a.index - b.index);

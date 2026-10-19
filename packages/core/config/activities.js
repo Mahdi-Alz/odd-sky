@@ -3,7 +3,7 @@ const HIGH = Infinity;
 
 export const LABEL_BOUNDS = { great: 80, good: 60, fair: 40 };
 
-export const SCORING = { badFactorDrag: 0.8, leadPenaltyPerHour: 0.3 };
+export const SCORING = { badFactorDrag: 0.8 };
 
 /** @type {import("../types").ActivityConfig[]} */
 export const ACTIVITIES = [
@@ -11,7 +11,7 @@ export const ACTIVITIES = [
     id: "running",
     light: "any",
     durationHours: 1,
-    horizon: 24,
+    horizon: 1,
     factors: [
       { source: "apparentTemp", weight: 3, ideal: [6, 17], ok: [-4, 26] },
       { source: "dewPoint", weight: 2, ideal: [LOW, 13], ok: [LOW, 20] },
@@ -36,7 +36,7 @@ export const ACTIVITIES = [
     id: "cycling",
     light: "any",
     durationHours: 2,
-    horizon: 24,
+    horizon: 2,
     factors: [
       { source: "apparentTemp", weight: 3, ideal: [12, 25], ok: [2, 32] },
       { source: "wind", weight: 3, ideal: [LOW, 15], ok: [LOW, 30] },
@@ -61,7 +61,7 @@ export const ACTIVITIES = [
     id: "laundry",
     light: "any",
     durationHours: 4,
-    horizon: 24,
+    horizon: 4,
     factors: [
       { source: "evaporation", weight: 6, ideal: [8, HIGH], ok: [5, HIGH] },
       { source: "precipProbability", aggregate: "max", weight: 3, ideal: [LOW, 10], ok: [LOW, 30] },
@@ -78,7 +78,7 @@ export const ACTIVITIES = [
     id: "hiking",
     light: "any",
     durationHours: 3,
-    horizon: 24,
+    horizon: 3,
     factors: [
       { source: "apparentTemp", weight: 3, ideal: [8, 24], ok: [-2, 32] },
       { source: "precipProbability", aggregate: "max", weight: 3, ideal: [LOW, 10], ok: [LOW, 40] },
@@ -101,7 +101,7 @@ export const ACTIVITIES = [
     id: "picnic",
     light: "any",
     durationHours: 3,
-    horizon: 24,
+    horizon: 3,
     factors: [
       { source: "daylight", weight: 4, ideal: [1, HIGH], ok: [0.5, HIGH] },
       { source: "apparentTemp", weight: 3, ideal: [18, 28], ok: [12, 34] },
@@ -140,7 +140,7 @@ export const ACTIVITIES = [
     id: "stargazing",
     light: "night",
     durationHours: 2,
-    horizon: 24,
+    horizon: 2,
     factors: [
       { source: "cloud", weight: 5, ideal: [LOW, 15], ok: [LOW, 50] },
       { source: "fog", weight: 3, ideal: [LOW, 0], ok: [LOW, 1] },

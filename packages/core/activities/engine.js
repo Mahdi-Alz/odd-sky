@@ -165,16 +165,14 @@ export const scoreActivity = (activity, hours, localDate) => {
 
   if (!length || pool.length < length) return unavailable(activity.id, "time", pool.length);
 
-  /** @type {{ hours: HourlyPoint[], lead: number }[]} */
+  /** @type {{ hours: HourlyPoint[] }[]} */
   const windows = [];
   if (whole) {
-    if (pool.every((hour) => matchesLight(hour, activity.light)))
-      windows.push({ hours: pool, lead: 0 });
+    if (pool.every((hour) => matchesLight(hour, activity.light))) windows.push({ hours: pool });
   } else {
     for (let start = 0; start + length <= pool.length; start += 1) {
       const slice = pool.slice(start, start + length);
-      if (slice.every((hour) => matchesLight(hour, activity.light)))
-        windows.push({ hours: slice, lead: start });
+      if (slice.every((hour) => matchesLight(hour, activity.light))) windows.push({ hours: slice });
     }
   }
 
@@ -185,7 +183,7 @@ export const scoreActivity = (activity, hours, localDate) => {
 
   /** @type {Map<number, number>} */
   const vetoCounts = new Map();
-  /** @type {{ score: number, rank: number, reasons: ActivityReason[], hours: HourlyPoint[] } | null} */
+  /** @type {{ score: number, reasons: ActivityReason[], hours: HourlyPoint[] } | null} */
   let best = null;
   for (const window of windows) {
     const vetoIndex = activity.vetoes.findIndex((veto) => isVetoed(veto, window.hours));
@@ -194,8 +192,7 @@ export const scoreActivity = (activity, hours, localDate) => {
       continue;
     }
     const result = scoreWindow(activity.factors, window.hours);
-    const rank = result.score - SCORING.leadPenaltyPerHour * window.lead;
-    if (!best || rank > best.rank) best = { ...result, rank, hours: window.hours };
+    if (!best || result.score > best.score) best = { ...result, hours: window.hours };
   }
 
   if (!best) {

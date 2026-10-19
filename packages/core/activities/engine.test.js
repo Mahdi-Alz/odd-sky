@@ -493,24 +493,3 @@ describe("bad factor drag", () => {
     expect(result.score).toBe(90);
   });
 });
-
-describe("lead time", () => {
-  it("prefers a sooner window when scores are close", () => {
-    const hours = series(24, 0, (i) => ({ temp: i === 20 ? 15 : 20.5 }));
-    const result = scoreActivity(probe({ horizon: 24 }), hours, DATE);
-    expect(result.window?.start).toBe("2026-10-19T00:00");
-  });
-
-  it("still picks a much better window later on", () => {
-    const hours = series(24, 0, (i) => ({ temp: i === 20 ? 15 : 28 }));
-    const result = scoreActivity(probe({ horizon: 24 }), hours, DATE);
-    expect(result.window?.start).toBe("2026-10-19T20:00");
-    expect(result.score).toBe(100);
-  });
-
-  it("finds tomorrow's window late in the evening with a rolling horizon", () => {
-    const hours = series(24, 21);
-    const result = scoreActivity(probe({ horizon: 24, light: "day" }), hours, DATE);
-    expect(result.window?.start).toBe("2026-10-20T06:00");
-  });
-});

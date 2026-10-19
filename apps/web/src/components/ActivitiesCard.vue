@@ -8,7 +8,7 @@ defineProps({
 });
 
 const { t } = useI18n();
-const { activityName, activityLabel, activityReason, formatNumber, formatWindow } = useFormat();
+const { activityName, activityLabel, activityReason, formatNumber, formatSpan } = useFormat();
 
 const LEVEL_COLORS = ["#f87171", "#fb923c", "#fbbf24", "#bef264", "#86e57f", "#4ade80"];
 const dots = (score) => {
@@ -45,10 +45,7 @@ const dots = (score) => {
         </div>
 
         <p class="mt-2 text-sm leading-snug text-white/70">
-          <template v-if="row.window"
-            ><bdi>{{ formatWindow(row.window, row.tomorrow) }}</bdi> ·
-          </template>
-          <template v-else-if="row.whole">{{ t("activities.horizon") }} · </template>
+          {{ formatSpan(row.hours) }} ·
           {{ row.headline.map(activityReason).join(" · ") }}
         </p>
       </li>

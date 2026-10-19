@@ -86,11 +86,12 @@ export const useFormat = () => {
 
   const activityReason = (reason) => t(`activities.reasons.${reason.factor}.${reason.side}`);
 
-  const formatWindow = (window, tomorrow = false) =>
-    t(tomorrow ? "activities.bestTomorrow" : "activities.best", {
-      from: formatHour(window.start),
-      to: formatHour(window.end),
-    });
+  const formatSpan = (hours) =>
+    hours == null
+      ? t("activities.horizon")
+      : hours === 1
+        ? t("activities.now")
+        : t("activities.nextHours", { hours: formatNumber(hours) });
 
   const factsFootnote = (years) => t("facts.footnote", { years: formatNumber(years) });
 
@@ -115,6 +116,6 @@ export const useFormat = () => {
     activityName,
     activityLabel,
     activityReason,
-    formatWindow,
+    formatSpan,
   };
 };

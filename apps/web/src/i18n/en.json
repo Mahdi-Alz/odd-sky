@@ -52,8 +52,8 @@
   },
   "activities": {
     "title": "Activities",
-    "best": "Best {from} – {to}",
-    "bestTomorrow": "Best tomorrow {from} – {to}",
+    "now": "Now",
+    "nextHours": "Next {hours} hours",
     "horizon": "Next 2 days",
     "footnote": "Scores come from the hourly forecast and are only a rough guide.",
     "names": {
@@ -123,12 +123,12 @@
         "above": "Daylight"
       },
       "darkness": {
-        "below": "No dark hours in the next 24 hours",
+        "below": "Not dark yet",
         "within": "Dark sky",
         "above": "Dark sky"
       },
       "time": {
-        "below": "Not enough time in the forecast",
+        "below": "Not enough forecast hours",
         "within": "Enough time",
         "above": "Enough time"
       },

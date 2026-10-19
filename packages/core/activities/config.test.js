@@ -90,12 +90,13 @@ const find = (id) =>
 
 describe("shipped activities", () => {
   const fine = hours(48, () => ({}));
+  const morning = fine.slice(9);
   /** @param {number} i */
   const night = (i) => ({ cloud: 5, isDay: i % 24 >= 6 && i % 24 < 18 });
 
   it("rates a calm mild dry day as great for the daytime activities", () => {
     for (const id of ["running", "cycling", "hiking", "picnic", "laundry"]) {
-      const result = scoreActivity(find(id), fine, "2026-10-19");
+      const result = scoreActivity(find(id), morning, "2026-10-19");
       expect(result.label, id).toBe("great");
       expect(result.window, id).not.toBeNull();
     }
@@ -134,10 +135,20 @@ describe("shipped activities", () => {
     expect(result.reasons[0].factor).toMatch(/^precip/);
   });
 
-  it("prefers the dry hours for laundry", () => {
+  it("scores only the hours starting now", () => {
     const wetMorning = hours(24, (i) => (i < 12 ? { precipProbability: 90, precipAmount: 1 } : {}));
-    const result = scoreActivity(find("laundry"), wetMorning, "2026-10-19");
-    expect((result.window?.start ?? "") >= "2026-10-19T12:00").toBe(true);
+    const now = scoreActivity(find("laundry"), wetMorning.slice(9), "2026-10-19");
+    expect(now.score).toBe(0);
+    expect(now.window?.start).toBeUndefined();
+    const later = scoreActivity(find("laundry"), wetMorning.slice(12), "2026-10-19");
+    expect(later.window).toEqual({ start: "2026-10-19T12:00", end: "2026-10-19T16:00" });
+    expect(later.label).toBe("great");
+  });
+
+  it("explains that stargazing waits for dark", () => {
+    const result = scoreActivity(find("stargazing"), morning, "2026-10-19");
+    expect(result.score).toBe(0);
+    expect(result.reasons[0].factor).toBe("darkness");
   });
 });
 
@@ -152,11 +163,7 @@ describe("realistic conditions", () => {
   });
 
   it("rates the dark lower than daylight for hiking", () => {
-    const day = scoreActivity(
-      find("hiking"),
-      hours(24, () => ({})),
-      "2026-10-19",
-    );
+    const day = scoreActivity(find("hiking"), hours(24, () => ({})).slice(9), "2026-10-19");
     const dark = scoreActivity(
       find("hiking"),
       hours(24, () => ({ isDay: false, radiation: 0 })),
@@ -167,13 +174,13 @@ describe("realistic conditions", () => {
   });
 
   it("scores laundry on drying power, not daylight alone", () => {
-    const sunnyDry = hours(24, () => ({}));
+    const sunnyDry = hours(24, () => ({})).slice(9);
     const greyHumid = hours(24, (i) => ({
       humidity: 88,
       cloud: 100,
       wind: 4,
       radiation: isDay(i) ? 120 : 0,
-    }));
+    })).slice(9);
     const windyNight = hours(24, () => ({
       isDay: false,
       radiation: 0,
