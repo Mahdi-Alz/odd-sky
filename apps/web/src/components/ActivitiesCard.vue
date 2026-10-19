@@ -7,8 +7,10 @@ defineProps({
 });
 
 const { t } = useI18n();
-const { activityName, activityLabel, activityReason, activityTone, formatNumber, formatWindow } =
-  useFormat();
+const { activityName, activityLabel, activityReason, formatNumber, formatWindow } = useFormat();
+
+const DOT_COLORS = ["#f87171", "#fb923c", "#fbbf24", "#a3e635", "#4ade80"];
+const litDots = (score) => Math.round(score / 20);
 </script>
 
 <template>
@@ -19,21 +21,22 @@ const { activityName, activityLabel, activityReason, activityTone, formatNumber,
 
     <ul class="mt-2 divide-y divide-line">
       <li v-for="row in rows" :key="row.id" class="py-3">
-        <div class="flex items-baseline justify-between gap-3">
+        <div class="flex items-center justify-between gap-3">
           <h3 class="text-base font-medium">{{ activityName(row.id) }}</h3>
-          <p class="shrink-0 text-sm font-medium text-white/85">
+          <p class="flex shrink-0 items-center gap-2 text-sm font-medium text-white/85">
             {{ activityLabel(row.label) }}
-            <span class="text-white/55" dir="ltr">{{ formatNumber(row.score) }}</span>
+            <span class="sr-only">{{ formatNumber(row.score) }}</span>
+            <span class="flex gap-1" dir="ltr" aria-hidden="true">
+              <span
+                v-for="(color, index) in DOT_COLORS"
+                :key="color"
+                class="size-2.5 rounded-full"
+                :class="index < litDots(row.score) ? '' : 'bg-white/20'"
+                :style="index < litDots(row.score) ? { backgroundColor: color } : undefined"
+              ></span>
+            </span>
           </p>
         </div>
-
-        <span class="mt-2 block h-1 rounded-full bg-white/20" aria-hidden="true">
-          <span
-            class="block h-1 rounded-full"
-            :class="activityTone(row.label)"
-            :style="{ width: `${Math.max(row.score, 3)}%` }"
-          ></span>
-        </span>
 
         <p class="mt-2 text-sm leading-snug text-white/70">
           <template v-if="row.window"

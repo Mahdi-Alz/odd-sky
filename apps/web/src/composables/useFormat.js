@@ -86,9 +86,6 @@ export const useFormat = () => {
 
   const activityReason = (reason) => t(`activities.reasons.${reason.factor}.${reason.side}`);
 
-  const activityTone = (label) =>
-    ({ great: "bg-good", good: "bg-cool", fair: "bg-warm", poor: "bg-danger" })[label];
-
   const formatWindow = (window) =>
     t("activities.best", { from: formatHour(window.start), to: formatHour(window.end) });
 
@@ -115,7 +112,6 @@ export const useFormat = () => {
     activityName,
     activityLabel,
     activityReason,
-    activityTone,
     formatWindow,
   };
 };
