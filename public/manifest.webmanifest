@@ -1,6 +1,6 @@
 {
-  "name": "Weather",
-  "short_name": "Weather",
+  "name": "Odd Sky",
+  "short_name": "Odd Sky",
   "description": "Search cities, save locations, and view current conditions with a 3-day forecast.",
   "start_url": "/",
   "scope": "/",

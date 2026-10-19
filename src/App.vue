@@ -30,7 +30,7 @@ const today = new Date().toLocaleDateString("en-us", {
     <div class="mx-auto max-w-5xl">
       <!-- header -->
       <header class="mb-10 text-center">
-        <h1 class="mt-2 font-display text-4xl font-bold tracking-tight text-primary/70 uppercase">Weather Station</h1>
+        <h1 class="mt-2 font-display text-4xl font-bold tracking-tight text-primary/70 uppercase">Odd Sky</h1>
         <p class="mt-2 text-sm text-base-content/50">{{ today }}</p>
       </header>
 

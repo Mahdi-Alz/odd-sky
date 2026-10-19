@@ -1,4 +1,4 @@
-# Weather Station
+# Odd Sky
 
 Vue 3 weather app. Search cities, add cards, view current conditions + 3-day forecast. Data from [WeatherAPI](https://www.weatherapi.com/).
 
