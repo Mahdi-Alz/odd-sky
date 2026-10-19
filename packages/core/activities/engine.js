@@ -69,6 +69,9 @@ export const labelFor = (score) => {
   return "poor";
 };
 
+/** @param {number} score */
+export const scoreLevel = (score) => (score <= 0 ? 1 : Math.min(6, 2 + Math.floor(score / 20)));
+
 /**
  * @param {ActivityVeto} veto
  */

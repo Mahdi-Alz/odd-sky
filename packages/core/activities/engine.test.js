@@ -5,6 +5,7 @@ import {
   labelFor,
   scoreActivities,
   scoreActivity,
+  scoreLevel,
   scoreRange,
 } from "./engine.js";
 
@@ -102,6 +103,24 @@ describe("labelFor", () => {
     [0, "poor"],
   ])("%s is %s", (score, label) => {
     expect(labelFor(score)).toBe(label);
+  });
+});
+
+describe("scoreLevel", () => {
+  it.each([
+    [0, 1],
+    [1, 2],
+    [19, 2],
+    [20, 3],
+    [39, 3],
+    [40, 4],
+    [59, 4],
+    [60, 5],
+    [79, 5],
+    [80, 6],
+    [100, 6],
+  ])("score %s is level %s", (score, level) => {
+    expect(scoreLevel(score)).toBe(level);
   });
 });
 

@@ -5,5 +5,6 @@ export {
   labelFor,
   scoreActivities,
   scoreActivity,
+  scoreLevel,
   scoreRange,
 } from "./engine.js";

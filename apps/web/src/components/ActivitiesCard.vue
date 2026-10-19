@@ -1,5 +1,6 @@
 <script setup>
 import { useI18n } from "vue-i18n";
+import { scoreLevel } from "@odd-sky/core";
 import { useFormat } from "../composables/useFormat";
 
 defineProps({
@@ -9,8 +10,13 @@ defineProps({
 const { t } = useI18n();
 const { activityName, activityLabel, activityReason, formatNumber, formatWindow } = useFormat();
 
-const DOT_COLORS = ["#f87171", "#fb923c", "#fbbf24", "#a3e635", "#4ade80"];
-const litDots = (score) => Math.round(score / 20);
+const LEVEL_COLORS = ["#f87171", "#fb923c", "#fbbf24", "#bef264", "#86e57f", "#4ade80"];
+const dots = (score) => {
+  const level = scoreLevel(score);
+  return LEVEL_COLORS.map((_, index) =>
+    index < level ? { id: index, color: LEVEL_COLORS[level - 1] } : { id: index, color: null },
+  );
+};
 </script>
 
 <template>
@@ -28,11 +34,11 @@ const litDots = (score) => Math.round(score / 20);
             <span class="sr-only">{{ formatNumber(row.score) }}</span>
             <span class="flex gap-1" dir="ltr" aria-hidden="true">
               <span
-                v-for="(color, index) in DOT_COLORS"
-                :key="color"
+                v-for="dot in dots(row.score)"
+                :key="dot.id"
                 class="size-2.5 rounded-full"
-                :class="index < litDots(row.score) ? '' : 'bg-white/20'"
-                :style="index < litDots(row.score) ? { backgroundColor: color } : undefined"
+                :class="dot.color ? '' : 'bg-white/20'"
+                :style="dot.color ? { backgroundColor: dot.color } : undefined"
               ></span>
             </span>
           </p>
