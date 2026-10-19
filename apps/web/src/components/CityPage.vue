@@ -2,11 +2,13 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { skyKey, weatherCode } from "@odd-sky/core";
+import ActivitiesCard from "./ActivitiesCard.vue";
 import DailyForecast from "./DailyForecast.vue";
 import DetailsGrid from "./DetailsGrid.vue";
 import FactsCard from "./FactsCard.vue";
 import HourlyStrip from "./HourlyStrip.vue";
 import UiIcon from "./UiIcon.vue";
+import { useActivities } from "../composables/useActivities";
 import { useFormat } from "../composables/useFormat";
 import { useLocalClock } from "../composables/useLocalClock";
 
@@ -22,6 +24,7 @@ const emit = defineEmits(["retry"]);
 const { t } = useI18n();
 const { formatTemp, formatTempValue, placeDetail } = useFormat();
 const { label: localTime } = useLocalClock(() => props.place.timezone);
+const { rows: activityRows } = useActivities(() => props.forecast);
 
 const condition = computed(() =>
   props.forecast ? weatherCode(props.forecast.current.code) : null,
@@ -36,7 +39,7 @@ const hasFacts = computed(() => (props.facts?.facts.length ?? 0) > 0);
 
 <template>
   <section
-    class="sky h-dvh w-full shrink-0 snap-start snap-always overflow-y-auto overscroll-y-contain"
+    class="no-scrollbar sky h-dvh w-full shrink-0 snap-start snap-always overflow-y-auto overscroll-y-contain"
     :data-sky="sky"
     :aria-label="place.name"
   >
@@ -85,6 +88,7 @@ const hasFacts = computed(() => (props.facts?.facts.length ?? 0) > 0);
 
         <FactsCard v-if="hasFacts" :facts="facts" />
         <HourlyStrip v-if="hourly.length" :hourly="hourly" />
+        <ActivitiesCard v-if="activityRows.length" :rows="activityRows" />
         <DailyForecast :daily="forecast.daily" />
         <DetailsGrid :current="forecast.current" />
       </template>

@@ -6,3 +6,4 @@ export * from "./facts/mock.js";
 export * from "./weather/sky.js";
 export * from "./refresh.js";
 export * from "./platform.js";
+export * from "./activities/index.js";

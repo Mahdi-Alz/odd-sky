@@ -33,7 +33,9 @@
     "transfer": "Move your cities",
     "transferHelp": "Copy a link that carries your saved cities. Open it on another device to add them. Nothing is sent to a server.",
     "about": "About",
-    "era5": "Past weather comes from ERA5 reanalysis (Copernicus/ECMWF). It is not an official station record."
+    "era5": "Past weather comes from ERA5 reanalysis (Copernicus/ECMWF). It is not an official station record.",
+    "activities": "Activities",
+    "activitiesHelp": "Choose which activities appear on each city page."
   },
   "units": {
     "kmh": "km/h",
@@ -47,6 +49,89 @@
     "wettestDay": "Wettest day in {years} years",
     "footnote": "Compared with ERA5 reanalysis for the same calendar day over the past {years} years. Today's value is a forecast. Neither is an official station record.",
     "title": "Odd today"
+  },
+  "activities": {
+    "title": "Activities",
+    "best": "Best {from} – {to}",
+    "horizon": "Next 2 days",
+    "footnote": "Scores come from the hourly forecast and are only a rough guide.",
+    "names": {
+      "running": "Running",
+      "cycling": "Cycling",
+      "laundry": "Drying laundry outside",
+      "hiking": "Walking and hiking",
+      "picnic": "Picnic",
+      "carWash": "Washing the car",
+      "stargazing": "Stargazing"
+    },
+    "labels": {
+      "great": "Great",
+      "good": "Good",
+      "fair": "Fair",
+      "poor": "Poor"
+    },
+    "reasons": {
+      "temp": {
+        "below": "Too cold",
+        "within": "Comfortable temperature",
+        "above": "Too hot"
+      },
+      "apparentTemp": {
+        "below": "Too cold",
+        "within": "Comfortable temperature",
+        "above": "Too hot"
+      },
+      "wind": {
+        "below": "Not enough wind",
+        "within": "Light wind",
+        "above": "Too windy"
+      },
+      "precipProbability": {
+        "below": "Low chance of rain",
+        "within": "Low chance of rain",
+        "above": "Rain likely"
+      },
+      "precipAmount": {
+        "below": "Dry",
+        "within": "Dry",
+        "above": "Rain expected"
+      },
+      "uv": {
+        "below": "Mild UV",
+        "within": "Mild UV",
+        "above": "Strong UV"
+      },
+      "humidity": {
+        "below": "Very dry air",
+        "within": "Comfortable humidity",
+        "above": "Humid air"
+      },
+      "cloud": {
+        "below": "Clear sky",
+        "within": "Few clouds",
+        "above": "Cloudy"
+      },
+      "thunder": {
+        "below": "No thunderstorms",
+        "within": "No thunderstorms",
+        "above": "Thunderstorms expected"
+      },
+      "daylight": {
+        "below": "No daylight left today",
+        "within": "Daylight",
+        "above": "Daylight"
+      },
+      "darkness": {
+        "below": "No dark hours left today",
+        "within": "Dark sky",
+        "above": "Dark sky"
+      },
+      "time": {
+        "below": "Not enough time left today",
+        "within": "Enough time",
+        "above": "Enough time"
+      }
+    }
   },
   "weather": {
     "0": "Clear sky",

@@ -5,7 +5,8 @@ const FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
 
 const CURRENT_VARS =
   "temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day,uv_index";
-const HOURLY_VARS = "temperature_2m,weather_code,is_day,precipitation_probability";
+const HOURLY_VARS =
+  "temperature_2m,apparent_temperature,weather_code,is_day,precipitation_probability,precipitation,wind_speed_10m,relative_humidity_2m,cloud_cover,uv_index";
 const DAILY_VARS =
   "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,snowfall_sum,wind_speed_10m_max,cloud_cover_mean";
 
@@ -45,7 +46,13 @@ export const getForecast = async (place, signal) => {
     hourly: hourly.time.map((time, i) => ({
       time,
       temp: hourly.temperature_2m[i],
+      apparentTemp: hourly.apparent_temperature[i],
+      wind: hourly.wind_speed_10m[i],
       precipProbability: hourly.precipitation_probability[i] ?? 0,
+      precipAmount: hourly.precipitation[i],
+      uv: hourly.uv_index[i],
+      humidity: hourly.relative_humidity_2m[i],
+      cloud: hourly.cloud_cover[i],
       code: hourly.weather_code[i],
       isDay: hourly.is_day[i] === 1,
     })),

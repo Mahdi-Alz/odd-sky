@@ -3,6 +3,7 @@ import { useI18n } from "vue-i18n";
 import { weatherCode } from "@odd-sky/core";
 import WeatherIcon from "./WeatherIcon.vue";
 import { useFormat } from "../composables/useFormat";
+import { HOURLY_SHOWN } from "../config/refresh";
 
 defineProps({
   hourly: { type: /** @type {import("vue").PropType<any[]>} */ (Array), required: true },
@@ -21,7 +22,7 @@ const RAIN_SHOWN_FROM = 20;
     </h2>
     <ul class="no-scrollbar -mx-1 mt-3 flex gap-1 overflow-x-auto px-1">
       <li
-        v-for="(point, index) in hourly"
+        v-for="(point, index) in hourly.slice(0, HOURLY_SHOWN)"
         :key="point.time"
         class="flex min-w-14 flex-col items-center gap-1.5 py-1"
       >

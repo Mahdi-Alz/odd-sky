@@ -16,7 +16,7 @@ const editing = ref(false);
 </script>
 
 <template>
-  <div class="fixed inset-0 z-20 overflow-y-auto bg-ink">
+  <div class="no-scrollbar fixed inset-0 z-20 overflow-y-auto bg-ink">
     <div class="safe-top safe-bottom mx-auto flex min-h-full max-w-xl flex-col gap-4 px-4">
       <header class="flex items-center justify-between gap-2 pt-2">
         <button

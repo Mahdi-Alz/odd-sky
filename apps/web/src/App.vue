@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, watch } from "vue";
+import { ACTIVITIES } from "@odd-sky/core";
 import CityList from "./components/CityList.vue";
 import CityPager from "./components/CityPager.vue";
 import InstallHint from "./components/InstallHint.vue";
@@ -36,6 +37,10 @@ useRefreshPolicy({
   online,
   enabled: computed(() => places.value.length > 0),
 });
+
+const activityOptions = computed(() =>
+  ACTIVITIES.map((activity) => ({ id: activity.id, enabled: settings.isActivityOn(activity.id) })),
+);
 
 const view = computed(() => {
   if (!places.value.length && nav.view.value !== "settings") return "list";
@@ -95,8 +100,10 @@ const addCity = (place) => {
       :locale="settings.locale"
       :units="settings.units"
       :copy-status="copyStatus"
+      :activities="activityOptions"
       @update:locale="settings.setLocale"
       @update:units="settings.setUnits"
+      @set-activity="settings.setActivity"
       @copy-link="copyLink"
       @close="nav.back()"
     />

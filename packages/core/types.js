@@ -26,7 +26,13 @@
  * @typedef {Object} HourlyPoint
  * @property {string} time
  * @property {number} temp
+ * @property {number} apparentTemp
+ * @property {number} wind
  * @property {number} precipProbability
+ * @property {number} precipAmount
+ * @property {number} uv
+ * @property {number} humidity
+ * @property {number} cloud
  * @property {number} code
  * @property {boolean} isDay
  */
@@ -144,9 +150,45 @@
  */
 
 /**
+ * @typedef {'temp' | 'apparentTemp' | 'wind' | 'precipProbability' | 'precipAmount' | 'uv' | 'humidity' | 'cloud' | 'thunder'} FactorSource
+ */
+
+/**
+ * @typedef {'mean' | 'max' | 'min' | 'sum'} Aggregate
+ */
+
+/**
+ * @typedef {Object} ActivityFactor
+ * @property {FactorSource} source
+ * @property {Aggregate} [aggregate]
+ * @property {number} weight
+ * @property {[number, number]} ideal
+ * @property {[number, number]} ok
+ */
+
+/**
+ * @typedef {Object} ActivityVeto
+ * @property {FactorSource} source
+ * @property {Aggregate} [aggregate]
+ * @property {number} [above]
+ * @property {number} [below]
+ */
+
+/**
+ * @typedef {Object} ActivityConfig
+ * @property {string} id
+ * @property {'any' | 'day' | 'night'} light
+ * @property {number | null} durationHours
+ * @property {'today' | number} horizon
+ * @property {ActivityFactor[]} factors
+ * @property {ActivityVeto[]} vetoes
+ */
+
+/**
  * @typedef {Object} ActivityReason
  * @property {string} factor
  * @property {'ideal' | 'ok' | 'bad'} level
+ * @property {'below' | 'within' | 'above'} side
  * @property {number} value
  */
 

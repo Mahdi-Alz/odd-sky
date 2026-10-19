@@ -1,3 +1,4 @@
 export const STALE_AFTER_MS = 10 * 60 * 1000;
 export const ACTIVE_REFRESH_MS = 15 * 60 * 1000;
-export const HOURLY_POINTS = 24;
+export const HOURLY_POINTS = 48;
+export const HOURLY_SHOWN = 24;

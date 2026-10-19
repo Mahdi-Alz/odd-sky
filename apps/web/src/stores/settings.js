@@ -15,6 +15,7 @@ export const useSettingsStore = defineStore("settings", {
   }),
   getters: {
     dir: (state) => (state.locale === "fa" ? "rtl" : "ltr"),
+    isActivityOn: (state) => (id) => state.activities[id] !== false,
   },
   actions: {
     setLocale(locale) {
@@ -22,6 +23,9 @@ export const useSettingsStore = defineStore("settings", {
     },
     setUnits(units) {
       this.units = units;
+    },
+    setActivity(id, enabled) {
+      this.activities = { ...this.activities, [id]: enabled };
     },
     dismissInstallHint() {
       this.installHintDismissed = true;

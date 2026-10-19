@@ -80,6 +80,18 @@ export const useFormat = () => {
     return "bg-white/60";
   };
 
+  const activityName = (id) => t(`activities.names.${id}`);
+
+  const activityLabel = (label) => t(`activities.labels.${label}`);
+
+  const activityReason = (reason) => t(`activities.reasons.${reason.factor}.${reason.side}`);
+
+  const activityTone = (label) =>
+    ({ great: "bg-good", good: "bg-cool", fair: "bg-warm", poor: "bg-danger" })[label];
+
+  const formatWindow = (window) =>
+    t("activities.best", { from: formatHour(window.start), to: formatHour(window.end) });
+
   const factsFootnote = (years) => t("facts.footnote", { years: formatNumber(years) });
 
   return {
@@ -100,5 +112,10 @@ export const useFormat = () => {
     factText,
     factTone,
     factsFootnote,
+    activityName,
+    activityLabel,
+    activityReason,
+    activityTone,
+    formatWindow,
   };
 };

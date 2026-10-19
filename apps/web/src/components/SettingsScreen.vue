@@ -2,14 +2,16 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import SegmentedControl from "./SegmentedControl.vue";
+import SwitchRow from "./SwitchRow.vue";
 import UiIcon from "./UiIcon.vue";
 
 const props = defineProps({
   locale: { type: String, required: true },
   units: { type: String, required: true },
   copyStatus: { type: String, default: null },
+  activities: { type: /** @type {import("vue").PropType<any[]>} */ (Array), default: () => [] },
 });
-const emit = defineEmits(["update:locale", "update:units", "copy-link", "close"]);
+const emit = defineEmits(["update:locale", "update:units", "set-activity", "copy-link", "close"]);
 
 const { t } = useI18n();
 
@@ -31,7 +33,7 @@ const copyLabel = computed(() => {
 </script>
 
 <template>
-  <div class="fixed inset-0 z-30 overflow-y-auto bg-ink">
+  <div class="no-scrollbar fixed inset-0 z-30 overflow-y-auto bg-ink">
     <div class="safe-top safe-bottom mx-auto flex min-h-full max-w-xl flex-col gap-5 px-4">
       <header class="flex items-center justify-between gap-2 pt-2">
         <button
@@ -64,6 +66,20 @@ const copyLabel = computed(() => {
           :label="t('settings.units')"
           @update:model-value="emit('update:units', $event)"
         />
+      </section>
+
+      <section class="glass p-4">
+        <h2 class="text-sm font-semibold text-white/80">{{ t("settings.activities") }}</h2>
+        <p class="mt-1 text-sm text-white/65">{{ t("settings.activitiesHelp") }}</p>
+        <div class="mt-2 divide-y divide-line">
+          <SwitchRow
+            v-for="activity in activities"
+            :key="activity.id"
+            :model-value="activity.enabled"
+            :label="t(`activities.names.${activity.id}`)"
+            @update:model-value="emit('set-activity', activity.id, $event)"
+          />
+        </div>
       </section>
 
       <section class="glass space-y-3 p-4">

@@ -50,7 +50,7 @@ const choose = (place) => {
 
     <ul
       v-if="results !== null"
-      class="absolute inset-x-0 z-10 mt-2 max-h-80 overflow-y-auto rounded-xl border border-line bg-ink-soft p-1 shadow-2xl shadow-black/50"
+      class="no-scrollbar absolute inset-x-0 z-10 mt-2 max-h-80 overflow-y-auto rounded-xl border border-line bg-ink-soft p-1 shadow-2xl shadow-black/50"
     >
       <li v-if="error" class="px-3 py-3 text-sm text-danger">{{ t("search.error") }}</li>
       <li v-else-if="results.length === 0" class="px-3 py-3 text-sm text-white/60">
