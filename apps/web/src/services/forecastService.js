@@ -1,9 +1,11 @@
 import { getJson } from "./http";
+import { HOURLY_POINTS } from "../config/refresh";
 
 const FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
 
 const CURRENT_VARS =
   "temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day,uv_index";
+const HOURLY_VARS = "temperature_2m,weather_code,is_day,precipitation_probability";
 const DAILY_VARS =
   "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,snowfall_sum,wind_speed_10m_max,cloud_cover_mean";
 
@@ -17,11 +19,15 @@ export const getForecast = async (place, signal) => {
     latitude: String(place.lat),
     longitude: String(place.lon),
     current: CURRENT_VARS,
+    hourly: HOURLY_VARS,
     daily: DAILY_VARS,
     forecast_days: "7",
+    forecast_hours: String(HOURLY_POINTS),
     timezone: "auto",
   });
-  const { current, daily, timezone } = await getJson(`${FORECAST_URL}?${params}`, { signal });
+  const { current, hourly, daily, timezone } = await getJson(`${FORECAST_URL}?${params}`, {
+    signal,
+  });
 
   return {
     timezone,
@@ -36,6 +42,13 @@ export const getForecast = async (place, signal) => {
       code: current.weather_code,
       isDay: current.is_day === 1,
     },
+    hourly: hourly.time.map((time, i) => ({
+      time,
+      temp: hourly.temperature_2m[i],
+      precipProbability: hourly.precipitation_probability[i] ?? 0,
+      code: hourly.weather_code[i],
+      isDay: hourly.is_day[i] === 1,
+    })),
     daily: daily.time.map((date, i) => ({
       date,
       code: daily.weather_code[i],

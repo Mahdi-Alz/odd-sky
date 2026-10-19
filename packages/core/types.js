@@ -26,14 +26,7 @@
  * @typedef {Object} HourlyPoint
  * @property {string} time
  * @property {number} temp
- * @property {number} feelsLike
- * @property {number} humidity
  * @property {number} precipProbability
- * @property {number} precip
- * @property {number} wind
- * @property {number} gust
- * @property {number} cloud
- * @property {number} uv
  * @property {number} code
  * @property {boolean} isDay
  */
@@ -73,6 +66,7 @@
  * @property {string} timezone
  * @property {string} localDate
  * @property {Current} current
+ * @property {HourlyPoint[]} hourly
  * @property {DailyPoint[]} daily
  */
 
@@ -168,6 +162,7 @@
 /**
  * @typedef {Object} Settings
  * @property {'fa' | 'en'} locale
+ * @property {boolean} installHintDismissed
  * @property {'metric' | 'imperial'} units
  * @property {Record<string, boolean>} activities
  * @property {Record<string, Record<string, number>>} thresholds

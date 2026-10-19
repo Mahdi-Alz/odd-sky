@@ -1,90 +1,104 @@
 <script setup>
-import { computed } from "vue";
-import { useI18n } from "vue-i18n";
-import SearchInput from "./components/SearchInput.vue";
-import SettingsBar from "./components/SettingsBar.vue";
-import WeatherCard from "./components/WeatherCard.vue";
+import { computed, ref, watch } from "vue";
+import CityList from "./components/CityList.vue";
+import CityPager from "./components/CityPager.vue";
+import InstallHint from "./components/InstallHint.vue";
+import SettingsScreen from "./components/SettingsScreen.vue";
+import StatusBanner from "./components/StatusBanner.vue";
 import { useCityWeather } from "./composables/useCityWeather";
-import { useFormat } from "./composables/useFormat";
+import { useInstallHint } from "./composables/useInstallHint";
 import { useLocaleSync } from "./composables/useLocaleSync";
+import { useNavigation } from "./composables/useNavigation";
+import { useOnline } from "./composables/useOnline";
+import { useRefreshPolicy } from "./composables/useRefreshPolicy";
 import { useTransfer } from "./composables/useTransfer";
 import { useCitiesStore } from "./stores/cities";
 import { useSettingsStore } from "./stores/settings";
 
-const { t } = useI18n();
 const settings = useSettingsStore();
 const cities = useCitiesStore();
-const { formatLongDate } = useFormat();
+const places = computed(() => cities.sorted);
+const activeIndex = ref(0);
+
+const nav = useNavigation();
+const online = useOnline();
 const { status: copyStatus, copyLink } = useTransfer();
-const { states } = useCityWeather(computed(() => cities.sorted));
+const { show: showInstallHint, dismiss: dismissInstallHint } = useInstallHint();
+const { states, refresh, ready } = useCityWeather(places);
 
 useLocaleSync();
+useRefreshPolicy({
+  places,
+  activeIndex,
+  states,
+  refresh,
+  ready,
+  online,
+  enabled: computed(() => places.value.length > 0),
+});
 
-const today = computed(() => formatLongDate(new Date()));
+const view = computed(() => {
+  if (!places.value.length && nav.view.value !== "settings") return "list";
+  return nav.view.value;
+});
+
+watch(
+  () => places.value.length,
+  (count) => {
+    if (activeIndex.value > count - 1) activeIndex.value = Math.max(count - 1, 0);
+  },
+);
+
+const selectCity = (index) => {
+  activeIndex.value = index;
+  nav.back();
+};
+
+const addCity = (place) => {
+  cities.add(place);
+  const index = places.value.findIndex((item) => item.id === place.id);
+  selectCity(index);
+};
 </script>
 
 <template>
-  <main class="min-h-dvh px-6 py-16">
-    <div class="mx-auto max-w-5xl">
-      <!-- header -->
-      <header class="mb-10 text-center">
-        <h1 class="mt-2 font-display text-4xl font-bold tracking-tight text-primary/70 uppercase">
-          {{ t("app.title") }}
-        </h1>
-        <p class="mt-2 text-sm text-base-content/50">{{ today }}</p>
-      </header>
+  <main class="relative h-dvh overflow-hidden">
+    <StatusBanner :offline="!online" class="absolute inset-x-0 top-0 z-10" />
 
-      <!-- search -->
-      <SearchInput @select="cities.add" />
+    <CityPager
+      v-if="places.length"
+      v-model:active="activeIndex"
+      :places="places"
+      :states="states"
+      @open-list="nav.open('list')"
+      @retry="refresh"
+    >
+      <template #above>
+        <InstallHint :show="showInstallHint" @dismiss="dismissInstallHint" />
+      </template>
+    </CityPager>
 
-      <SettingsBar
-        :locale="settings.locale"
-        :units="settings.units"
-        :copy-status="copyStatus"
-        @update:locale="settings.setLocale"
-        @update:units="settings.setUnits"
-        @copy-link="copyLink"
-      />
+    <CityList
+      v-if="view === 'list' || view === 'settings'"
+      :places="places"
+      :states="states"
+      @select="selectCity"
+      @add="addCity"
+      @remove="cities.remove"
+      @move="cities.move"
+      @open-settings="nav.open('settings')"
+      @close="nav.back()"
+    />
 
-      <!-- weather cards -->
-      <div
-        v-if="cities.sorted.length"
-        class="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
-      >
-        <WeatherCard
-          v-for="place in cities.sorted"
-          :key="place.id"
-          :place="place"
-          :forecast="states[place.id]?.forecast"
-          :facts="states[place.id]?.facts"
-          :loading="states[place.id]?.loading"
-          :error="states[place.id]?.error"
-          @remove="cities.remove(place.id)"
-        />
-      </div>
-
-      <!-- empty state -->
-      <div v-else class="mt-20 flex flex-col items-center gap-3 text-center text-base-content/40">
-        <svg
-          class="size-10"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.7-1.8A4 4 0 0 0 6.5 16" />
-        </svg>
-        <p class="text-sm">{{ t("app.emptyState") }}</p>
-      </div>
-
-      <footer class="mt-16 text-center text-xs text-base-content/40">
-        {{ t("app.dataBy") }}
-        <a href="https://open-meteo.com/" target="_blank" rel="noopener" class="link link-hover"
-          >Open-Meteo</a
-        >
-      </footer>
-    </div>
+    <SettingsScreen
+      v-if="view === 'settings'"
+      :locale="settings.locale"
+      :units="settings.units"
+      :copy-status="copyStatus"
+      @update:locale="settings.setLocale"
+      @update:units="settings.setUnits"
+      @copy-link="copyLink"
+      @close="nav.back()"
+    />
   </main>
 </template>

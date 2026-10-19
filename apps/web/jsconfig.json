@@ -9,7 +9,7 @@
     "skipLibCheck": true,
     "strict": false,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["vite/client", "node"],
+    "types": ["vite/client", "node", "vite-plugin-pwa/client"],
     "paths": {
       "@/*": ["./src/*"]
     }

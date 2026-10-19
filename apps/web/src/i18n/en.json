@@ -27,7 +27,13 @@
     "imperial": "°F · mph",
     "copyLink": "Copy transfer link",
     "copied": "Link copied",
-    "copyFailed": "Couldn't copy the link"
+    "copyFailed": "Couldn't copy the link",
+    "title": "Settings",
+    "back": "Back",
+    "transfer": "Move your cities",
+    "transferHelp": "Copy a link that carries your saved cities. Open it on another device to add them. Nothing is sent to a server.",
+    "about": "About",
+    "era5": "Past weather comes from ERA5 reanalysis (Copernicus/ECMWF). It is not an official station record."
   },
   "units": {
     "kmh": "km/h",
@@ -39,7 +45,8 @@
     "warmestNight": "Warmest night in {years} years",
     "coldestNight": "Coldest night in {years} years",
     "wettestDay": "Wettest day in {years} years",
-    "footnote": "Compared with ERA5 reanalysis for the same calendar day over the past {years} years. Today's value is a forecast. Neither is an official station record."
+    "footnote": "Compared with ERA5 reanalysis for the same calendar day over the past {years} years. Today's value is a forecast. Neither is an official station record.",
+    "title": "Odd today"
   },
   "weather": {
     "0": "Clear sky",
@@ -71,5 +78,35 @@
     "96": "Thunderstorm with hail",
     "99": "Severe thunderstorm",
     "unknown": "Unknown"
+  },
+  "pager": {
+    "goTo": "Go to city {n}"
+  },
+  "list": {
+    "title": "Weather",
+    "open": "Cities",
+    "close": "Back to forecast",
+    "edit": "Edit",
+    "done": "Done",
+    "moveUp": "Move up",
+    "moveDown": "Move down"
+  },
+  "page": {
+    "hourly": "Hourly forecast",
+    "daily": "7-day forecast",
+    "details": "Details",
+    "now": "Now",
+    "high": "H:",
+    "low": "L:"
+  },
+  "status": {
+    "offline": "You're offline. Showing saved data.",
+    "retry": "Try again",
+    "stale": "Couldn't refresh. Showing saved data."
+  },
+  "install": {
+    "title": "Install Odd Sky",
+    "steps": "Tap Share, then Add to Home Screen.",
+    "dismiss": "Dismiss"
   }
 }

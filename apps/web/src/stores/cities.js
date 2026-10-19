@@ -15,6 +15,15 @@ export const useCitiesStore = defineStore("cities", {
       this.items.push({ ...place, order });
       return true;
     },
+    move(id, delta) {
+      const list = this.sorted;
+      const from = list.findIndex((item) => item.id === id);
+      const to = from + delta;
+      if (from === -1 || to < 0 || to >= list.length) return;
+      const [moved] = list.splice(from, 1);
+      list.splice(to, 0, moved);
+      this.items = list.map((item, order) => ({ ...item, order }));
+    },
     remove(id) {
       this.items = this.items.filter((item) => item.id !== id);
     },

@@ -7,14 +7,16 @@ import { useCitiesStore } from "./stores/cities";
 import { useSettingsStore } from "./stores/settings";
 import { requestPersistence } from "./storage/persist";
 
-// fonts
-import "@fontsource/inter";
+import "./assets/css/style.css";
+import "@fontsource/inter/300.css";
+import "@fontsource/inter/400.css";
 import "@fontsource/inter/500.css";
 import "@fontsource/inter/600.css";
-import "@fontsource/space-grotesk/500.css";
-import "@fontsource/space-grotesk/700.css";
-import "@fontsource/jetbrains-mono/400.css";
-import "@fontsource/jetbrains-mono/500.css";
+import "@fontsource/vazirmatn/300.css";
+import "@fontsource/vazirmatn/400.css";
+import "@fontsource/vazirmatn/500.css";
+import "@fontsource/vazirmatn/600.css";
+import { registerSW } from "virtual:pwa-register";
 
 const start = async () => {
   const pinia = createPinia();
@@ -40,6 +42,7 @@ const start = async () => {
   window.addEventListener("hashchange", importFromLocation);
 
   requestPersistence();
+  registerSW({ immediate: true });
   app.mount("#app");
 };
 

@@ -4,6 +4,8 @@ import { getFacts } from "../services/factsService";
 import { getForecast } from "../services/forecastService";
 import { cache } from "../storage";
 
+const forecastKey = (place) => `forecast:v2:${place.id}`;
+
 const loadFacts = async (place, state) => {
   const { localDate, timezone } = state.forecast;
   const key = `facts:${locationKey(place.lat, place.lon)}:${localDate}`;
@@ -23,29 +25,52 @@ const loadFacts = async (place, state) => {
 
 export const useCityWeather = (places) => {
   const states = reactive({});
+  const inflight = new Map();
+  const hydrations = new Map();
 
-  const load = async (place) => {
-    const state = reactive({ forecast: null, facts: null, loading: true, error: false });
+  const hydrate = async (place) => {
+    const state = reactive({
+      forecast: null,
+      facts: null,
+      loading: true,
+      refreshing: false,
+      error: false,
+      updatedAt: null,
+    });
     states[place.id] = state;
-    const key = `forecast:${place.id}`;
 
-    const cached = await cache.get(key);
-    if (cached && !state.forecast) {
+    const cached = await cache.get(forecastKey(place));
+    if (cached && !state.forecast && states[place.id] === state) {
       state.forecast = cached.data;
+      state.updatedAt = cached.savedAt;
       state.loading = false;
+      await loadFacts(place, state);
     }
+  };
 
+  const fetchFresh = async (place, state) => {
+    state.refreshing = true;
     try {
       const forecast = await getForecast(place);
       state.forecast = forecast;
       state.error = false;
-      await cache.set(key, forecast);
+      state.updatedAt = Date.now();
+      await cache.set(forecastKey(place), forecast);
     } catch {
-      if (!state.forecast) state.error = true;
+      state.error = true;
     }
     state.loading = false;
-
+    state.refreshing = false;
     if (state.forecast && states[place.id] === state) await loadFacts(place, state);
+  };
+
+  const refresh = (place) => {
+    const state = states[place.id];
+    if (!state) return Promise.resolve();
+    if (inflight.has(place.id)) return inflight.get(place.id);
+    const promise = fetchFresh(place, state).finally(() => inflight.delete(place.id));
+    inflight.set(place.id, promise);
+    return promise;
   };
 
   watch(
@@ -53,14 +78,19 @@ export const useCityWeather = (places) => {
     (list) => {
       const ids = new Set(list.map((place) => place.id));
       for (const id of Object.keys(states)) {
-        if (!ids.has(id)) delete states[id];
+        if (!ids.has(id)) {
+          delete states[id];
+          hydrations.delete(id);
+        }
       }
       for (const place of list) {
-        if (!states[place.id]) load(place);
+        if (!states[place.id]) hydrations.set(place.id, hydrate(place));
       }
     },
     { immediate: true },
   );
 
-  return { states };
+  const ready = (id) => hydrations.get(id) ?? Promise.resolve();
+
+  return { states, refresh, ready };
 };

@@ -1,60 +1,124 @@
 @import "tailwindcss";
-@plugin "daisyui" {
-  themes: skyline --default;
-}
-@plugin "daisyui/theme" {
-  name: "skyline";
-  default: true;
-  color-scheme: dark;
-
-  --color-base-100: #0b1220;
-  --color-base-200: #111a2e;
-  --color-base-300: #1b2740;
-  --color-base-content: #eef1f8;
-
-  --color-primary: #6c8cff;
-  --color-primary-content: #0b1220;
-  --color-secondary: #7dd3c0;
-  --color-secondary-content: #0b1220;
-  --color-accent: #ffb454;
-  --color-accent-content: #0b1220;
-
-  --color-neutral: #1b2740;
-  --color-neutral-content: #eef1f8;
-
-  --color-info: #6ec8f2;
-  --color-info-content: #0b1220;
-  --color-success: #4ade80;
-  --color-success-content: #0b1220;
-  --color-warning: #fbbf24;
-  --color-warning-content: #0b1220;
-  --color-error: #f87171;
-  --color-error-content: #0b1220;
-
-  --radius-selector: 0.5rem;
-  --radius-field: 0.75rem;
-  --radius-box: 1.25rem;
-
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-
-  --border: 1px;
-  --depth: 1;
-  --noise: 0;
-}
 
 @theme {
-  --font-sans: "Inter", "sans-serif";
-  --font-display: "Space Grotesk", "sans-serif";
-  --font-mono: "JetBrains Mono", monospace;
+  --font-sans: "Inter", "Vazirmatn", system-ui, sans-serif;
+
+  --color-ink: #0b1220;
+  --color-ink-soft: #111a2e;
+  --color-glass: rgb(255 255 255 / 0.12);
+  --color-glass-strong: rgb(255 255 255 / 0.2);
+  --color-line: rgb(255 255 255 / 0.14);
+  --color-accent: #ffb454;
+  --color-cool: #6ec8f2;
+  --color-warm: #fbbf24;
+  --color-danger: #f87171;
+
+  --radius-card: 1.5rem;
 }
 
 @layer base {
+  html {
+    color-scheme: dark;
+    background: var(--color-ink);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html[lang="fa"] {
+    --font-sans: "Vazirmatn", "Inter", system-ui, sans-serif;
+  }
+
   body {
+    margin: 0;
     font-family: var(--font-sans);
-    background:
-      radial-gradient(ellipse 60% 40% at 15% -10%, oklch(45% 0.1 265 / 35%), transparent),
-      radial-gradient(ellipse 50% 35% at 100% 0%, oklch(55% 0.12 45 / 12%), transparent);
-    background-attachment: fixed;
+    color: #fff;
+    background: var(--color-ink);
+    overscroll-behavior: none;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  input {
+    font: inherit;
+  }
+
+  input[type="search"]::-webkit-search-cancel-button,
+  input[type="search"]::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}
+
+@layer components {
+  .sky {
+    background: var(--sky);
+  }
+
+  [data-sky="clear-day"] {
+    --sky: linear-gradient(180deg, #1e5fc7 0%, #4f9de8 55%, #8cc6f5 100%);
+  }
+  [data-sky="clear-night"] {
+    --sky: linear-gradient(180deg, #050a1a 0%, #0e1b3d 55%, #1d2f5c 100%);
+  }
+  [data-sky="partly-day"] {
+    --sky: linear-gradient(180deg, #3b6db3 0%, #6e9fd0 55%, #a4c4e0 100%);
+  }
+  [data-sky="partly-night"] {
+    --sky: linear-gradient(180deg, #0a1228 0%, #1a2a4d 55%, #2c3f66 100%);
+  }
+  [data-sky="cloudy-day"] {
+    --sky: linear-gradient(180deg, #5b6b80 0%, #7f8da0 55%, #a3afbd 100%);
+  }
+  [data-sky="cloudy-night"] {
+    --sky: linear-gradient(180deg, #1a2230 0%, #2a3546 55%, #3b4759 100%);
+  }
+  [data-sky="fog-day"] {
+    --sky: linear-gradient(180deg, #6b7785 0%, #8d98a4 55%, #b0b8c1 100%);
+  }
+  [data-sky="fog-night"] {
+    --sky: linear-gradient(180deg, #232a33 0%, #343d48 55%, #48535f 100%);
+  }
+  [data-sky="rain-day"] {
+    --sky: linear-gradient(180deg, #3a4a63 0%, #52647f 55%, #6f8199 100%);
+  }
+  [data-sky="rain-night"] {
+    --sky: linear-gradient(180deg, #0f1724 0%, #1b2638 55%, #2a384d 100%);
+  }
+  [data-sky="snow-day"] {
+    --sky: linear-gradient(180deg, #6f87a6 0%, #93a9c3 55%, #c0cfe0 100%);
+  }
+  [data-sky="snow-night"] {
+    --sky: linear-gradient(180deg, #1d2a3e 0%, #2f4058 55%, #475c78 100%);
+  }
+  [data-sky="thunder-day"] {
+    --sky: linear-gradient(180deg, #2d3348 0%, #454c66 55%, #5f6781 100%);
+  }
+  [data-sky="thunder-night"] {
+    --sky: linear-gradient(180deg, #0b0d17 0%, #181b2d 55%, #272b45 100%);
+  }
+
+  .glass {
+    background: var(--color-glass);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .safe-top {
+    padding-top: max(1.25rem, env(safe-area-inset-top));
+  }
+  .safe-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 }

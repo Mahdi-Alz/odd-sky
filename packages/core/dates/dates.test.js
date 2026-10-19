@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  formatLocalIso,
   formatInstant,
   formatIsoDate,
   historyDates,
@@ -129,5 +130,18 @@ describe("formatting", () => {
         hourCycle: "h23",
       }),
     ).toBe("00:15");
+  });
+});
+
+describe("formatLocalIso", () => {
+  it("formats the hour exactly as written, with no zone shift", () => {
+    expect(formatLocalIso("2026-10-19T16:00", "en", { hour: "numeric" })).toBe("4 PM");
+    expect(formatLocalIso("2026-10-19T00:00", "en", { hour: "numeric" })).toBe("12 AM");
+  });
+
+  it("uses Persian digits for fa", () => {
+    expect(
+      formatLocalIso("2026-10-19T16:00", "fa", { hour: "numeric", hourCycle: "h23" }),
+    ).toContain("۱۶");
   });
 });

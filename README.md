@@ -5,19 +5,20 @@ Vue 3 weather app. Search cities, add cards, view current conditions + 7-day for
 ## Features
 
 - City search with debounced autocomplete
-- Multiple saved place cards
-- Current temp, feels-like, humidity, wind, UV
-- 7-day forecast per place
+- Swipe between saved cities, one full-screen page each
+- Current temp, hourly strip, feels-like, humidity, wind, UV
+- 7-day forecast with temperature range bars
 - "How unusual is today?" fact badges (placeholder data until the real fact engine lands)
 - English and Persian (RTL, Jalali dates), metric or imperial units
 - Saved cities persist in the browser and can be moved to another device with a transfer link
-- Dark theme UI (Tailwind + daisyUI)
+- Weather-aware gradients by condition and day or night
 
 ## Tech Stack
 
 - Vue 3 (`<script setup>`), Pinia, vue-i18n
 - Vite
-- Tailwind CSS 4 + daisyUI
+- Tailwind CSS 4
+- vite-plugin-pwa (installable, works offline)
 
 ## Setup
 
@@ -39,7 +40,7 @@ npm run preview
 apps/web/
   src/
     App.vue                  # root layout
-    components/              # presentational components
+    components/              # presentational components (pager, city page, list, settings)
     composables/             # UI logic and state
     stores/                  # Pinia stores (cities, settings)
     services/                # Open-Meteo network calls

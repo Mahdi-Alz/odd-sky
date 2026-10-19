@@ -8,6 +8,7 @@ const detectLocale = () =>
 export const useSettingsStore = defineStore("settings", {
   state: () => ({
     locale: /** @type {'fa' | 'en'} */ (detectLocale()),
+    installHintDismissed: false,
     units: /** @type {'metric' | 'imperial'} */ ("metric"),
     activities: /** @type {Record<string, boolean>} */ ({}),
     thresholds: /** @type {Record<string, Record<string, number>>} */ ({}),
@@ -21,6 +22,9 @@ export const useSettingsStore = defineStore("settings", {
     },
     setUnits(units) {
       this.units = units;
+    },
+    dismissInstallHint() {
+      this.installHintDismissed = true;
     },
   },
   persist: { key: "settings" },

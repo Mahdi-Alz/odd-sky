@@ -1,5 +1,6 @@
 <script setup>
 import { useI18n } from "vue-i18n";
+import UiIcon from "./UiIcon.vue";
 import { useCitySearch } from "../composables/useCitySearch";
 import { useFormat } from "../composables/useFormat";
 
@@ -16,81 +17,55 @@ const choose = (place) => {
 </script>
 
 <template>
-  <div class="relative mx-auto w-full max-w-xl">
-    <form @submit.prevent>
+  <div class="relative w-full">
+    <form role="search" @submit.prevent>
       <label
-        class="input input-lg w-full items-center gap-3 rounded-box border-base-300 bg-base-200/80 shadow-lg shadow-black/20 backdrop-blur focus-within:border-primary/60"
+        class="flex items-center gap-3 rounded-xl border border-line bg-white/10 px-4 py-3 backdrop-blur focus-within:border-white/50"
       >
-        <svg
-          class="size-5 shrink-0 text-base-content/50"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <circle cx="11" cy="11" r="7" />
-          <path d="m20 20-3.5-3.5" />
-        </svg>
-
+        <UiIcon name="search" class="size-5 shrink-0 text-white/60" />
         <input
           v-model="query"
-          type="text"
+          type="search"
+          enterkeyhint="search"
+          autocomplete="off"
           :placeholder="t('search.placeholder')"
-          class="grow"
+          class="min-w-0 grow bg-transparent text-base text-white outline-none placeholder:text-white/50"
           @input="search"
         />
-
-        <span v-if="loading" class="loading loading-spinner loading-sm text-base-content/40"></span>
+        <span
+          v-if="loading"
+          class="size-4 shrink-0 animate-spin rounded-full border-2 border-white/30 border-t-white"
+        ></span>
         <button
           v-else-if="query"
           type="button"
-          class="btn btn-ghost btn-circle btn-xs text-base-content/50 hover:text-base-content"
+          class="grid size-6 shrink-0 place-items-center rounded-full text-white/60 hover:text-white"
           :aria-label="t('search.clear')"
           @click="clear"
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-          >
-            <path d="M18 6 6 18M6 6l12 12" />
-          </svg>
+          <UiIcon name="close" class="size-4" />
         </button>
       </label>
     </form>
 
-    <!-- search suggestions -->
     <ul
       v-if="results !== null"
-      class="menu absolute z-10 mt-2 w-full rounded-box border border-base-300 bg-base-200/95 p-2 shadow-xl shadow-black/30 backdrop-blur"
+      class="absolute inset-x-0 z-10 mt-2 max-h-80 overflow-y-auto rounded-xl border border-line bg-ink-soft p-1 shadow-2xl shadow-black/50"
     >
-      <li v-if="error" class="px-3 py-2 text-sm text-error">
-        {{ t("search.error") }}
-      </li>
-      <li v-else-if="results.length === 0" class="px-3 py-2 text-sm text-base-content/50">
+      <li v-if="error" class="px-3 py-3 text-sm text-danger">{{ t("search.error") }}</li>
+      <li v-else-if="results.length === 0" class="px-3 py-3 text-sm text-white/60">
         {{ t("search.noResults") }}
       </li>
       <li v-for="place in results" :key="place.id">
-        <button type="button" class="rounded-field" @click="choose(place)">
-          <svg
-            class="size-4 shrink-0 text-base-content/40"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11Z" />
-            <circle cx="12" cy="10" r="2.5" />
-          </svg>
+        <button
+          type="button"
+          class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-start hover:bg-white/10"
+          @click="choose(place)"
+        >
+          <UiIcon name="pin" class="size-4 shrink-0 text-white/50" />
           <span class="truncate"
             >{{ place.name
-            }}<span class="text-base-content/50">{{
+            }}<span class="text-white/55">{{
               placeDetail(place) ? listSeparator + placeDetail(place) : ""
             }}</span></span
           >

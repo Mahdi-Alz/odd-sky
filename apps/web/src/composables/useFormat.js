@@ -1,6 +1,12 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { formatInstant, formatIsoDate, toDisplaySpeed, toDisplayTemp } from "@odd-sky/core";
+import {
+  formatInstant,
+  formatIsoDate,
+  formatLocalIso,
+  toDisplaySpeed,
+  toDisplayTemp,
+} from "@odd-sky/core";
 import { useSettingsStore } from "../stores/settings";
 
 export const useFormat = () => {
@@ -13,7 +19,9 @@ export const useFormat = () => {
 
   const formatNumber = (value) => numberFormat.value.format(Math.round(value) || 0);
 
-  const formatTemp = (celsius) => `${formatNumber(toDisplayTemp(celsius, settings.units))}°`;
+  const formatTempValue = (celsius) => formatNumber(toDisplayTemp(celsius, settings.units));
+
+  const formatTemp = (celsius) => `${formatTempValue(celsius)}°`;
 
   const tempUnit = computed(() => (settings.units === "imperial" ? "F" : "C"));
 
@@ -30,6 +38,16 @@ export const useFormat = () => {
       hour: "numeric",
       minute: "2-digit",
     });
+
+  const formatHour = (localIso) => formatLocalIso(localIso, settings.locale, { hour: "numeric" });
+
+  const formatFactsDate = (isoDate) =>
+    formatIsoDate(isoDate, settings.locale, { weekday: "long", month: "long", day: "numeric" });
+
+  const formatCityClock = (instant, timeZone) =>
+    formatInstant(instant, settings.locale, timeZone, { hour: "numeric", minute: "2-digit" });
+
+  const formatPercent = (value) => `${formatNumber(value)}%`;
 
   const formatLongDate = (instant) =>
     formatInstant(instant, settings.locale, undefined, {
@@ -56,10 +74,10 @@ export const useFormat = () => {
     [place.admin, place.country].filter(Boolean).join(listSeparator.value);
 
   const factTone = (fact) => {
-    if (fact.family === "precipitation") return "badge-primary";
-    if (fact.kind === "record-high") return "badge-warning";
-    if (fact.kind === "record-low") return "badge-info";
-    return "";
+    if (fact.family === "precipitation") return "bg-cool";
+    if (fact.kind === "record-high") return "bg-warm";
+    if (fact.kind === "record-low") return "bg-cool";
+    return "bg-white/60";
   };
 
   const factsFootnote = (years) => t("facts.footnote", { years: formatNumber(years) });
@@ -67,9 +85,14 @@ export const useFormat = () => {
   return {
     formatNumber,
     formatTemp,
+    formatTempValue,
     tempUnit,
     formatSpeed,
     formatWeekday,
+    formatHour,
+    formatFactsDate,
+    formatCityClock,
+    formatPercent,
     formatCityTime,
     formatLongDate,
     listSeparator,

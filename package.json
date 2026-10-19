@@ -14,7 +14,7 @@
     "test": "vitest run",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "typecheck": "tsc -p apps/web/jsconfig.json && tsc -p packages/core/jsconfig.json"
+    "typecheck": "vue-tsc --noEmit -p apps/web/jsconfig.json && tsc -p packages/core/jsconfig.json"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
@@ -24,7 +24,8 @@
     "globals": "^16.0.0",
     "prettier": "^3.0.0",
     "typescript": "^5.0.0",
-    "vitest": "^3.0.0"
+    "vitest": "^3.0.0",
+    "vue-tsc": "^3.3.13"
   },
   "engines": {
     "node": "^22.18.0 || >=24.12.0"

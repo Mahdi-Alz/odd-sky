@@ -109,6 +109,16 @@ export const formatIsoDate = (isoDate, locale, options = {}) =>
   );
 
 /**
+ * @param {string} localIso
+ * @param {string} locale
+ * @param {Intl.DateTimeFormatOptions} [options]
+ */
+export const formatLocalIso = (localIso, locale, options = {}) =>
+  new Intl.DateTimeFormat(calendarLocale(locale), { ...options, timeZone: "UTC" }).format(
+    new Date(`${localIso}:00Z`),
+  );
+
+/**
  * @param {Date} instant
  * @param {string} locale
  * @param {string | undefined} timeZone
