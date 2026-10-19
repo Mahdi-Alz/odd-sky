@@ -1,6 +1,7 @@
 import { getJson } from "./http";
 
 const GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search";
+const PLACE_URL = "https://geocoding-api.open-meteo.com/v1/get";
 
 /**
  * @param {string} query
@@ -22,4 +23,16 @@ export const searchPlaces = async (query, locale, signal) => {
       lon: r.longitude,
       timezone: r.timezone,
     }));
+};
+
+/**
+ * @param {string} id
+ * @param {'fa' | 'en'} locale
+ * @param {AbortSignal} [signal]
+ * @returns {Promise<import("@odd-sky/core/types").PlaceLabel>}
+ */
+export const getPlaceLabel = async (id, locale, signal) => {
+  const params = new URLSearchParams({ id, language: locale });
+  const data = await getJson(`${PLACE_URL}?${params}`, { signal });
+  return { name: data.name, admin: data.admin1 ?? "", country: data.country ?? "" };
 };

@@ -6,6 +6,7 @@ import CityPager from "./components/CityPager.vue";
 import InstallHint from "./components/InstallHint.vue";
 import SettingsScreen from "./components/SettingsScreen.vue";
 import StatusBanner from "./components/StatusBanner.vue";
+import { useCityLabels } from "./composables/useCityLabels";
 import { useCityWeather } from "./composables/useCityWeather";
 import { useInstallHint } from "./composables/useInstallHint";
 import { useLocaleSync } from "./composables/useLocaleSync";
@@ -28,6 +29,7 @@ const { show: showInstallHint, dismiss: dismissInstallHint } = useInstallHint();
 const { states, refresh, ready } = useCityWeather(places);
 
 useLocaleSync();
+useCityLabels();
 useRefreshPolicy({
   places,
   activeIndex,
@@ -60,7 +62,7 @@ const selectCity = (index) => {
 };
 
 const addCity = (place) => {
-  cities.add(place);
+  cities.add(place, settings.locale);
   const index = places.value.findIndex((item) => item.id === place.id);
   selectCity(index);
 };

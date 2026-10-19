@@ -55,4 +55,29 @@ describe("cities store", () => {
     store.add(city("d"));
     expect(order(store)).toEqual(["a", "c", "d"]);
   });
+
+  it("remembers the name in the language it was added in", () => {
+    const store = useCitiesStore();
+    store.add({ ...city("t"), name: "تهران", country: "ایران" }, "fa");
+    expect(store.items[0].labels?.fa).toEqual({ name: "تهران", admin: "", country: "ایران" });
+  });
+
+  it("switches names to a stored language and reports the missing ones", () => {
+    const store = useCitiesStore();
+    store.add({ ...city("t"), name: "تهران" }, "fa");
+    store.add(city("x"));
+    store.setLabel("t", "en", { name: "Tehran", admin: "Tehran", country: "Iran" }, false);
+    expect(store.items[0].name).toBe("تهران");
+    expect(store.applyLocale("en")).toEqual(["x"]);
+    expect(store.items[0]).toMatchObject({ name: "Tehran", country: "Iran" });
+    expect(store.applyLocale("fa")).toEqual(["x"]);
+    expect(store.items[0].name).toBe("تهران");
+  });
+
+  it("applies a fetched label only when asked", () => {
+    const store = useCitiesStore();
+    store.add(city("x"));
+    store.setLabel("x", "fa", { name: "ایکس", admin: "", country: "" }, true);
+    expect(store.items[0].name).toBe("ایکس");
+  });
 });

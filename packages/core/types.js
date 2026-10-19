@@ -8,6 +8,14 @@
  * @property {number} lon
  * @property {string} timezone
  * @property {number} order
+ * @property {Partial<Record<'fa' | 'en', PlaceLabel>>} [labels]
+ */
+
+/**
+ * @typedef {Object} PlaceLabel
+ * @property {string} name
+ * @property {string} admin
+ * @property {string} country
  */
 
 /**
