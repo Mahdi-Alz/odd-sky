@@ -40,3 +40,6 @@ __screenshots__/
 
 # Env
 .env
+.vercel
+.env*
+!.env.example

@@ -20,6 +20,8 @@
     "vue-i18n": "^11.4.16"
   },
   "devDependencies": {
+    "@hono/node-server": "^2.1.5",
+    "@odd-sky/api": "*",
     "@types/node": "^26.6.5",
     "@vitejs/plugin-vue": "^6.0.7",
     "vite": "^8.0.16",

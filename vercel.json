@@ -1,4 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "outputDirectory": "apps/web/dist"
+  "outputDirectory": "apps/web/dist",
+  "regions": ["fra1"],
+  "rewrites": [{ "source": "/api/:path*", "destination": "/api" }]
 }

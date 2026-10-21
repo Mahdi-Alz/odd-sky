@@ -1,0 +1,15 @@
+export const DAY_COLUMNS = /** @type {const} */ ([
+  ["tmax", "tmax"],
+  ["tmin", "tmin"],
+  ["appTmax", "app_tmax"],
+  ["appTmin", "app_tmin"],
+  ["precip", "precip"],
+  ["rain", "rain"],
+  ["snow", "snow"],
+  ["precipHours", "precip_hours"],
+  ["windMax", "wind_max"],
+  ["gustMax", "gust_max"],
+  ["cloudMean", "cloud_mean"],
+  ["rhMean", "rh_mean"],
+  ["sunshine", "sunshine"],
+]);

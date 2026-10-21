@@ -7,3 +7,5 @@ export * from "./weather/sky.js";
 export * from "./refresh.js";
 export * from "./platform.js";
 export * from "./activities/index.js";
+export * from "./history.js";
+export { HISTORY, BIAS, FACTS } from "./config/history.js";

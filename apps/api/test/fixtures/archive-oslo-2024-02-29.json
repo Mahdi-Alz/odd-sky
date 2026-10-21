@@ -1,0 +1,41 @@
+{
+  "latitude": 60.0,
+  "longitude": 10.75,
+  "generationtime_ms": 1.3703107833862305,
+  "utc_offset_seconds": 7200,
+  "timezone": "Europe/Oslo",
+  "timezone_abbreviation": "GMT+2",
+  "elevation": 0.0,
+  "daily_units": {
+    "time": "iso8601",
+    "temperature_2m_max": "°C",
+    "temperature_2m_min": "°C",
+    "apparent_temperature_max": "°C",
+    "apparent_temperature_min": "°C",
+    "precipitation_sum": "mm",
+    "rain_sum": "mm",
+    "snowfall_sum": "cm",
+    "precipitation_hours": "h",
+    "wind_speed_10m_max": "km/h",
+    "wind_gusts_10m_max": "km/h",
+    "cloud_cover_mean": "%",
+    "relative_humidity_2m_mean": "%",
+    "sunshine_duration": "s"
+  },
+  "daily": {
+    "time": ["2024-02-29"],
+    "temperature_2m_max": [5.4],
+    "temperature_2m_min": [3.5],
+    "apparent_temperature_max": [1.8],
+    "apparent_temperature_min": [-0.6],
+    "precipitation_sum": [11.1],
+    "rain_sum": [11.1],
+    "snowfall_sum": [0.0],
+    "precipitation_hours": [20.0],
+    "wind_speed_10m_max": [23.0],
+    "wind_gusts_10m_max": [49.0],
+    "cloud_cover_mean": [100],
+    "relative_humidity_2m_mean": [94],
+    "sunshine_duration": [0.0]
+  }
+}

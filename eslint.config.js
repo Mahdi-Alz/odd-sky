@@ -16,6 +16,10 @@ export default [
     languageOptions: { globals: { ...globals.es2021 } },
   },
   {
+    files: ["apps/api/**/*.js", "api/**/*.js"],
+    languageOptions: { globals: { ...globals.node } },
+  },
+  {
     files: ["**/*.config.js", "**/*.test.js"],
     languageOptions: { globals: { ...globals.node } },
   },

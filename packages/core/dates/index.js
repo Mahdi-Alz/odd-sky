@@ -126,3 +126,23 @@ export const formatLocalIso = (localIso, locale, options = {}) =>
  */
 export const formatInstant = (instant, locale, timeZone, options = {}) =>
   new Intl.DateTimeFormat(calendarLocale(locale), { ...options, timeZone }).format(instant);
+
+/**
+ * @param {string} isoDate
+ * @param {number} days
+ */
+export const addDays = (isoDate, days) => {
+  const date = new Date(`${isoDate}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+};
+
+/** @param {string} timeZone */
+export const isValidTimeZone = (timeZone) => {
+  try {
+    new Intl.DateTimeFormat("en", { timeZone });
+    return true;
+  } catch {
+    return false;
+  }
+};

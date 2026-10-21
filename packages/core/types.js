@@ -78,6 +78,13 @@
  */
 
 /**
+ * @typedef {Object} BiasOffset
+ * @property {string} variable
+ * @property {number} offset
+ * @property {number} nDays
+ */
+
+/**
  * @typedef {Object} Forecast
  * @property {string} timezone
  * @property {string} localDate

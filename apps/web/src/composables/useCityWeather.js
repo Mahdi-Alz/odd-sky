@@ -1,5 +1,6 @@
 import { reactive, watch } from "vue";
-import { locationKey, msUntilLocalMidnight } from "@odd-sky/core";
+import { HISTORY, locationKey, msUntilLocalMidnight } from "@odd-sky/core";
+import { PARTIAL_FACTS_TTL_MS } from "../config/refresh";
 import { getFacts } from "../services/factsService";
 import { getForecast } from "../services/forecastService";
 import { cache } from "../storage";
@@ -8,16 +9,21 @@ const forecastKey = (place) => `forecast:v4:${place.id}`;
 
 const loadFacts = async (place, state) => {
   const { localDate, timezone } = state.forecast;
-  const key = `facts:${locationKey(place.lat, place.lon)}:${localDate}`;
+  const key = `facts:v2:${locationKey(place.lat, place.lon)}:${localDate}`;
   const cached = await cache.get(key);
   if (cached) {
     state.facts = cached.data;
     return;
   }
   try {
-    const facts = await getFacts(place, localDate);
+    const facts = await getFacts(place);
     state.facts = facts;
-    await cache.set(key, facts, msUntilLocalMidnight(timezone));
+    const untilMidnight = msUntilLocalMidnight(timezone);
+    const ttl =
+      facts.yearsAvailable < HISTORY.years
+        ? Math.min(PARTIAL_FACTS_TTL_MS, untilMidnight)
+        : untilMidnight;
+    await cache.set(key, facts, ttl);
   } catch {
     state.facts = null;
   }
