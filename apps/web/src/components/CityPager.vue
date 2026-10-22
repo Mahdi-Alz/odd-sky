@@ -48,7 +48,7 @@ useCityPager(container, activeIndex, count);
       <div class="pointer-events-auto">
         <slot name="above" />
       </div>
-      <div class="pointer-events-auto relative flex min-h-10 items-center justify-center px-4">
+      <div class="pointer-events-auto relative mx-auto flex min-h-10 max-w-2xl items-center justify-center px-4">
         <PageDots :count="count" :active="active" @select="emit('update:active', $event)" />
         <button
           type="button"
