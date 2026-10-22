@@ -4,8 +4,10 @@ import {
   formatInstant,
   formatIsoDate,
   formatLocalIso,
+  DEPARTURE,
   toDisplaySpeed,
   toDisplayTemp,
+  toDisplayTempDelta,
 } from "@odd-sky/core";
 import { useSettingsStore } from "../stores/settings";
 
@@ -74,10 +76,18 @@ export const useFormat = () => {
     [place.admin, place.country].filter(Boolean).join(listSeparator.value);
 
   const factTone = (fact) => {
-    if (fact.family === "precipitation") return "bg-cool";
+    if (fact.kind === "unusual") return "bg-warm";
+    if (fact.family === "precipitation" || fact.family === "snow") return "bg-cool";
     if (fact.kind === "record-high") return "bg-warm";
     if (fact.kind === "record-low") return "bg-cool";
     return "bg-white/60";
+  };
+
+  const departureText = (departure) => {
+    if (!departure || Math.abs(departure.delta) < DEPARTURE.minDelta) return "";
+    const delta = `${formatNumber(Math.abs(toDisplayTempDelta(departure.delta, settings.units)))}°`;
+    const key = departure.delta > 0 ? "page.departure.above" : "page.departure.below";
+    return t(key, { delta, years: formatNumber(departure.years) });
   };
 
   const activityName = (id) => t(`activities.names.${id}`);
@@ -113,6 +123,7 @@ export const useFormat = () => {
     factText,
     factTone,
     factsFootnote,
+    departureText,
     activityName,
     activityLabel,
     activityReason,

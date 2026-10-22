@@ -16,3 +16,10 @@ export const toDisplayTemp = (celsius, units) =>
  * @param {'metric' | 'imperial'} units
  */
 export const toDisplaySpeed = (kmh, units) => (units === "imperial" ? kmhToMph(kmh) : kmh);
+
+/**
+ * @param {number} celsius
+ * @param {'metric' | 'imperial'} units
+ */
+export const toDisplayTempDelta = (celsius, units) =>
+  units === "imperial" ? (celsius * 9) / 5 : celsius;

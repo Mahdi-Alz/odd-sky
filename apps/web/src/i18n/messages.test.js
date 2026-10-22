@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ACTIVITIES, LABEL_BOUNDS, mockFixtures, weatherCodeList } from "@odd-sky/core";
+import { ACTIVITIES, DETECTORS, LABEL_BOUNDS, weatherCodeList } from "@odd-sky/core";
 import en from "./en.json";
 import fa from "./fa.json";
 
@@ -22,12 +22,19 @@ describe("messages", () => {
     }
   });
 
-  it("has a message for every mock fact", () => {
-    for (const fact of Object.values(mockFixtures).flat()) {
-      const [, key] = fact.messageKey.split(".");
-      expect(en.facts[key]).toContain("{years}");
-      expect(fa.facts[key]).toContain("{years}");
+  it("has a message for every fact a detector can return", () => {
+    for (const key of DETECTORS.flatMap((detector) => detector.messageKeys)) {
+      expect(lookup(en, key)).toContain("{years}");
+      expect(lookup(fa, key)).toContain("{years}");
     }
+  });
+
+  it("has no fact message that no detector uses", () => {
+    const used = new Set(DETECTORS.flatMap((detector) => detector.messageKeys));
+    const extra = Object.keys(en.facts)
+      .map((key) => `facts.${key}`)
+      .filter((key) => !used.has(key) && !["facts.title", "facts.footnote"].includes(key));
+    expect(extra).toEqual([]);
   });
 
   it("keeps the same placeholders in both languages", () => {

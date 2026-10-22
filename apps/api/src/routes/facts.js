@@ -1,13 +1,12 @@
 import { Hono } from "hono";
 import {
-  FACTS,
   HISTORY,
   historyDates,
   isValidTimeZone,
   localDateIn,
   locationKey,
-  mockFactsResponse,
   msUntilLocalMidnight,
+  runFacts,
   yearsAvailable,
 } from "@odd-sky/core";
 import { FACTS_CACHE } from "../config.js";
@@ -21,6 +20,10 @@ const coordinate = (value, limit) => {
   const number = Number(value);
   return Number.isFinite(number) && Math.abs(number) <= limit ? number : null;
 };
+
+/** @param {unknown} reason */
+const retryAfterSeconds = (reason) =>
+  Math.ceil((reason instanceof QuotaError ? reason.retryAfterMs : 60_000) / 1000);
 
 /** @param {import("../deps.js").Deps} deps */
 export const factsRoute = (deps) => {
@@ -43,7 +46,7 @@ export const factsRoute = (deps) => {
     const cached = await deps.cache.get(cacheKey);
     if (cached) {
       c.header("x-cache", "hit");
-      c.header("cache-control", `private, max-age=${Math.floor(untilMidnight / 1000)}`);
+      c.header("cache-control", "private, no-cache");
       return c.json(cached);
     }
 
@@ -53,39 +56,56 @@ export const factsRoute = (deps) => {
       lon: Number(lon.toFixed(1)),
       timezone: tz,
     });
-    const [ingest] = await Promise.allSettled([
+    const [ingest, bias, today] = await Promise.allSettled([
       ingestHistory(deps, { location, localDate }),
-      refreshBias(deps, { location, localDate }).catch((error) => {
-        deps.log("bias refresh failed", error);
+      refreshBias(deps, { location, localDate }),
+      deps.openMeteo.forecastDays({
+        lat: location.lat,
+        lon: location.lon,
+        timezone: tz,
+        start: localDate,
+        end: localDate,
       }),
     ]);
-    const ingestError = ingest.status === "rejected" ? ingest.reason : (ingest.value.error ?? null);
+    const ingestError = ingest.status === "rejected" ? ingest.reason : ingest.value.error;
     if (ingestError) deps.log("history ingestion failed", ingestError);
+    if (bias.status === "rejected") deps.log("bias refresh failed", bias.reason);
 
     const dates = historyDates(localDate, HISTORY.years).map((target) => target.date);
+    const history = await deps.history.getDays(key, dates);
     const years = yearsAvailable(
       localDate,
-      await deps.history.storedDates(key, dates),
+      history.map((day) => day.date),
       HISTORY.years,
     );
-    if (years === 0) {
-      const retryAfter = ingestError instanceof QuotaError ? ingestError.retryAfterMs : 60_000;
-      c.header("retry-after", String(Math.ceil(retryAfter / 1000)));
-      return c.json({ error: "history-unavailable" }, 503);
+    const todayStats = today.status === "fulfilled" ? today.value[0] : undefined;
+    if (years === 0 || !todayStats) {
+      if (today.status === "rejected") deps.log("today's forecast failed", today.reason);
+      const reason = today.status === "rejected" ? today.reason : ingestError;
+      c.header("retry-after", String(retryAfterSeconds(reason)));
+      return c.json({ error: years === 0 ? "history-unavailable" : "forecast-unavailable" }, 503);
     }
 
-    const mock = mockFactsResponse({ lat, lon, timezone: tz, localDate });
+    const offsets =
+      bias.status === "fulfilled" ? bias.value.offsets : (await deps.history.getBias(key)).offsets;
+    const { facts, departure } = runFacts({ today: todayStats, history, bias: offsets, localDate });
     /** @type {import("@odd-sky/core/types").FactsResponse} */
     const response = {
-      ...mock,
+      locationKey: key,
+      localDate,
+      timezone: tz,
+      source: "era5",
       yearsAvailable: years,
-      facts: years >= FACTS.minYears ? mock.facts : [],
+      facts,
+      departure,
     };
-    const ttl =
-      years === HISTORY.years ? untilMidnight : Math.min(FACTS_CACHE.partialTtlMs, untilMidnight);
+    const ttl = Math.min(
+      years === HISTORY.years ? FACTS_CACHE.maxTtlMs : FACTS_CACHE.partialTtlMs,
+      untilMidnight,
+    );
     await deps.cache.set(cacheKey, response, ttl);
     c.header("x-cache", "miss");
-    c.header("cache-control", `private, max-age=${Math.floor(ttl / 1000)}`);
+    c.header("cache-control", "private, no-cache");
     return c.json(response);
   });
 

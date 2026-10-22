@@ -121,6 +121,15 @@
  */
 
 /**
+ * @typedef {Object} Departure
+ * @property {string} variable
+ * @property {number} value
+ * @property {number} mean
+ * @property {number} delta
+ * @property {number} years
+ */
+
+/**
  * @typedef {Object} FactsResponse
  * @property {string} locationKey
  * @property {string} localDate
@@ -128,6 +137,7 @@
  * @property {'era5'} source
  * @property {number} yearsAvailable
  * @property {Fact[]} facts
+ * @property {Departure | null} departure
  */
 
 /**
@@ -147,23 +157,57 @@
  */
 
 /**
+ * @typedef {keyof Omit<DayStats, 'date'> | 'range'} FactVariable
+ */
+
+/**
  * @typedef {Object} DetectorContext
  * @property {string} localDate
- * @property {string} timezone
- * @property {Record<string, number>} bias
- * @property {Record<string, number>} stdDev
+ * @property {number} historyYears
  */
 
 /**
  * @typedef {Object} Detector
  * @property {string} id
  * @property {string} family
- * @property {string} variable
- * @property {'high' | 'low'} direction
- * @property {number} minYears
- * @property {number} margin
- * @property {(today: DayStats) => boolean} [when]
+ * @property {FactVariable} variable
+ * @property {string[]} messageKeys
  * @property {(today: DayStats, history: DayStats[], ctx: DetectorContext) => FactCandidate | null} detect
+ */
+
+/**
+ * @typedef {Object} RecordDetectorConfig
+ * @property {string} id
+ * @property {string} family
+ * @property {FactVariable} variable
+ * @property {'high' | 'low'} direction
+ * @property {number} margin
+ * @property {string} unit
+ * @property {number} [min]
+ * @property {number} [max]
+ * @property {string} messageKey
+ */
+
+/**
+ * @typedef {Object} FirstDetectorConfig
+ * @property {string} id
+ * @property {string} family
+ * @property {FactVariable} variable
+ * @property {number} threshold
+ * @property {string} unit
+ * @property {string} messageKey
+ */
+
+/**
+ * @typedef {Object} DryDetectorConfig
+ * @property {string} id
+ * @property {string} family
+ * @property {FactVariable} variable
+ * @property {number} wetAt
+ * @property {number} dryBelow
+ * @property {number} minShare
+ * @property {string} unit
+ * @property {string} messageKey
  */
 
 /**

@@ -42,13 +42,39 @@
     "mph": "mph"
   },
   "facts": {
-    "warmestDay": "Warmest day in {years} years",
-    "coolestDay": "Coolest day in {years} years",
-    "warmestNight": "Warmest night in {years} years",
-    "coldestNight": "Coldest night in {years} years",
-    "wettestDay": "Wettest day in {years} years",
+    "title": "Odd today",
     "footnote": "Compared with ERA5 reanalysis for the same calendar day over the past {years} years. Today's value is a forecast. Neither is an official station record.",
-    "title": "Odd today"
+    "tmaxHigh": "Warmest day in {years} years",
+    "tmaxHighAll": "Warmest day in all {years} years of data",
+    "tmaxLow": "Coolest day in {years} years",
+    "tmaxLowAll": "Coolest day in all {years} years of data",
+    "tminHigh": "Warmest night in {years} years",
+    "tminHighAll": "Warmest night in all {years} years of data",
+    "tminLow": "Coldest night in {years} years",
+    "tminLowAll": "Coldest night in all {years} years of data",
+    "appTmaxHigh": "Highest feels-like temperature in {years} years",
+    "appTmaxHighAll": "Highest feels-like temperature in all {years} years of data",
+    "appTminLow": "Lowest feels-like temperature in {years} years",
+    "appTminLowAll": "Lowest feels-like temperature in all {years} years of data",
+    "precipHigh": "Wettest day in {years} years",
+    "precipHighAll": "Wettest day in all {years} years of data",
+    "gustHigh": "Strongest gusts in {years} years",
+    "gustHighAll": "Strongest gusts in all {years} years of data",
+    "cloudHigh": "Cloudiest day in {years} years",
+    "cloudHighAll": "Cloudiest day in all {years} years of data",
+    "cloudLow": "Clearest sky in {years} years",
+    "cloudLowAll": "Clearest sky in all {years} years of data",
+    "sunshineHigh": "Sunniest day in {years} years",
+    "sunshineHighAll": "Sunniest day in all {years} years of data",
+    "rhLow": "Driest air in {years} years",
+    "rhLowAll": "Driest air in all {years} years of data",
+    "rangeHigh": "Biggest day-to-night temperature swing in {years} years",
+    "rangeHighAll": "Biggest day-to-night temperature swing in all {years} years of data",
+    "snowFirst": "First snow on this day in {years} years",
+    "snowFirstAll": "First snow on this day in all {years} years of data",
+    "rainFirst": "First rain on this day in {years} years",
+    "rainFirstAll": "First rain on this day in all {years} years of data",
+    "dryUnusual": "Usually wet on this day ({rainy} of {years} years), but dry today"
   },
   "activities": {
     "title": "Activities",
@@ -216,7 +242,11 @@
     "details": "Details",
     "now": "Now",
     "high": "H:",
-    "low": "L:"
+    "low": "L:",
+    "departure": {
+      "above": "{delta} above the {years}-year average high",
+      "below": "{delta} below the {years}-year average high"
+    }
   },
   "status": {
     "offline": "You're offline. Showing saved data.",

@@ -3,10 +3,6 @@ export const HISTORY = {
   model: "era5",
 };
 
-export const FACTS = {
-  minYears: 5,
-};
-
 export const BIAS = {
   fromDaysBack: 60,
   toDaysBack: 6,

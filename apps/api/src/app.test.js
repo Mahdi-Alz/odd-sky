@@ -50,10 +50,25 @@ describe("GET /api/facts", () => {
   });
 
   it("caches until local midnight in the city's time zone", async () => {
-    const { app } = setup({ now: Date.parse("2026-10-22T20:00:00Z") });
+    const { app, clock } = setup({ now: Date.parse("2026-10-22T20:00:00Z") });
     const res = await app.request(tehran);
     expect((await res.json()).localDate).toBe("2026-10-22");
-    expect(res.headers.get("cache-control")).toBe("private, max-age=1800");
+    expect(res.headers.get("cache-control")).toBe("private, no-cache");
+    clock.time += 29 * 60_000;
+    expect((await app.request(tehran)).headers.get("x-cache")).toBe("hit");
+    clock.time = Date.parse("2026-10-22T20:30:00Z");
+    const next = await app.request(tehran);
+    expect((await next.json()).localDate).toBe("2026-10-23");
+    expect(next.headers.get("x-cache")).toBe("miss");
+  });
+
+  it("recomputes after six hours so a changed forecast shows up", async () => {
+    const { app, clock } = setup();
+    await app.request(tehran);
+    clock.time += 6 * 3600_000 - 1000;
+    expect((await app.request(tehran)).headers.get("x-cache")).toBe("hit");
+    clock.time += 2000;
+    expect((await app.request(tehran)).headers.get("x-cache")).toBe("miss");
   });
 
   it("uses the city's local date, not the server's", async () => {
@@ -70,7 +85,7 @@ describe("GET /api/facts", () => {
     expect(calls.filter(isSingleDay)).toHaveLength(before);
   });
 
-  it("returns partial history with a short cache and no facts below minYears", async () => {
+  it("returns no facts and no departure below minYears", async () => {
     const { app } = setup({
       respond: (url) =>
         isSingleDay(url) && Number(url.searchParams.get("start_date")?.slice(0, 4)) < 2022
@@ -81,7 +96,64 @@ describe("GET /api/facts", () => {
     const body = await res.json();
     expect(body.yearsAvailable).toBe(4);
     expect(body.facts).toEqual([]);
-    expect(res.headers.get("cache-control")).toBe("private, max-age=600");
+    expect(body.departure).toBeNull();
+  });
+
+  it("keeps partial history in the cache for only ten minutes", async () => {
+    const { app, clock } = setup({
+      respond: (url) =>
+        isSingleDay(url) && url.searchParams.get("start_date")?.startsWith("1999")
+          ? new Response("bad", { status: 400 })
+          : undefined,
+    });
+    expect((await (await app.request(tehran)).json()).yearsAvailable).toBe(29);
+    clock.time += 9 * 60_000;
+    expect((await app.request(tehran)).headers.get("x-cache")).toBe("hit");
+    clock.time += 2 * 60_000;
+    expect((await app.request(tehran)).headers.get("x-cache")).toBe("miss");
+  });
+
+  it("runs the fact engine on today's forecast and the stored history", async () => {
+    const { app, calls } = setup({
+      respond: (url) =>
+        url.hostname === "api.open-meteo.com" && isSingleDay(url)
+          ? Response.json({
+              daily: {
+                time: ["2026-10-22"],
+                temperature_2m_max: [31],
+                temperature_2m_min: [12],
+                apparent_temperature_max: [29],
+                relative_humidity_2m_mean: [40],
+              },
+            })
+          : undefined,
+    });
+    const body = await (await app.request(tehran)).json();
+    const today = calls.find((url) => url.hostname === "api.open-meteo.com" && isSingleDay(url));
+    expect(today?.searchParams.get("start_date")).toBe("2026-10-22");
+    expect(today?.searchParams.get("timezone")).toBe("Asia/Tehran");
+    expect(today?.searchParams.get("daily")?.split(",")).toHaveLength(13);
+    expect(body.facts[0]).toMatchObject({
+      id: "tmax-high",
+      years: 30,
+      messageKey: "facts.tmaxHighAll",
+      params: { years: 30 },
+    });
+    expect(body.departure).toMatchObject({ variable: "tmax", years: 30 });
+    expect(body.departure.delta).toBeGreaterThan(5);
+  });
+
+  it("answers 503 when today's forecast cannot be fetched", async () => {
+    const { app, cache } = setup({
+      respond: (url) =>
+        url.hostname === "api.open-meteo.com" && isSingleDay(url)
+          ? new Response("down", { status: 500 })
+          : undefined,
+    });
+    const res = await app.request(tehran);
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ error: "forecast-unavailable" });
+    expect(await cache.get("facts:35.7,51.4:2026-10-22:v2")).toBeNull();
   });
 
   it("answers 503 when no history could be fetched", async () => {
@@ -89,7 +161,7 @@ describe("GET /api/facts", () => {
     const res = await app.request(tehran);
     expect(res.status).toBe(503);
     expect(Number(res.headers.get("retry-after"))).toBeGreaterThan(0);
-    expect(await cache.get("facts:35.7,51.4:2026-10-22:v1")).toBeNull();
+    expect(await cache.get("facts:35.7,51.4:2026-10-22:v2")).toBeNull();
   });
 
   it("counts weighted Open-Meteo calls in the quota", async () => {
@@ -97,7 +169,7 @@ describe("GET /api/facts", () => {
     await app.request(tehran);
     const health = await (await app.request("/api/health")).json();
     expect(health).toMatchObject({ ok: true, history: "memory", cache: "memory" });
-    expect(health.quota.day).toBeCloseTo(30 * 1.3 + 2 * (55 / 14), 1);
+    expect(health.quota.day).toBeCloseTo(31 * 1.3 + 2 * (55 / 14), 1);
   });
 });
 

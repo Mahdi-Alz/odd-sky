@@ -109,9 +109,9 @@ export const createOpenMeteo = ({
       daily(config.archiveUrl, range, fields, { models: HISTORY.model }),
     /**
      * @param {{ lat: number, lon: number, timezone: string, start: string, end: string }} range
-     * @param {readonly DayField[]} fields
+     * @param {readonly DayField[]} [fields]
      */
-    forecastDays: (range, fields) => daily(config.forecastUrl, range, fields),
+    forecastDays: (range, fields = ALL_FIELDS) => daily(config.forecastUrl, range, fields),
   };
 };
 

@@ -22,7 +22,7 @@ const props = defineProps({
 const emit = defineEmits(["retry"]);
 
 const { t } = useI18n();
-const { formatTemp, formatTempValue, placeDetail } = useFormat();
+const { formatTemp, formatTempValue, placeDetail, departureText } = useFormat();
 const { label: localTime } = useLocalClock(() => props.place.timezone);
 const { rows: activityRows } = useActivities(() => props.forecast);
 
@@ -35,6 +35,11 @@ const sky = computed(() =>
 const today = computed(() => props.forecast?.daily[0] ?? null);
 const hourly = computed(() => props.forecast?.hourly ?? []);
 const hasFacts = computed(() => (props.facts?.facts.length ?? 0) > 0);
+const departure = computed(() =>
+  props.facts && props.forecast?.localDate === props.facts.localDate
+    ? departureText(props.facts.departure)
+    : "",
+);
 </script>
 
 <template>
@@ -83,6 +88,7 @@ const hasFacts = computed(() => (props.facts?.facts.length ?? 0) > 0);
               {{ t("page.low") }} <span dir="ltr">{{ formatTemp(today.min) }}</span>
             </span>
           </p>
+          <p v-if="departure" class="mt-1 text-sm text-white/70">{{ departure }}</p>
           <p v-if="error" class="mt-3 text-xs text-white/70">{{ t("status.stale") }}</p>
         </div>
 
