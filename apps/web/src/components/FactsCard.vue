@@ -50,7 +50,7 @@ const { open: noteOpen, id: noteId, toggle: toggleNote, close: closeNote } = use
           v-if="noteOpen"
           :id="noteId"
           role="status"
-          class="glass fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-30 mx-auto flex max-w-md items-start gap-3 bg-black/70 p-4 text-sm leading-snug text-white/90 shadow-lg"
+          class="glass fixed inset-x-4 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-30 mx-auto flex max-w-md items-start gap-3 bg-black/70 p-4 text-sm leading-snug text-white/90 shadow-lg"
         >
           <p class="flex-1">{{ factsFootnote(facts.yearsAvailable) }}</p>
           <button
