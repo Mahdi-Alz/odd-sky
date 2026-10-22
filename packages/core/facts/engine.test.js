@@ -43,19 +43,23 @@ const detector = (id) => {
 const ctx = { localDate, historyYears: 30 };
 
 describe("golden facts on recorded ERA5 history and forecasts", () => {
-  it("Tehran: highest feels-like temperature in 15 years, 2010 was warmer", () => {
+  it("Tehran: warmest October 23 in 15 years, close to the 30-year record", () => {
     const f = golden("tehran");
     const result = runFacts({ today: f.today, history: f.history, bias: f.bias, localDate });
     expect(result.facts).toEqual([
       expect.objectContaining({
-        id: "app-tmax-high",
+        id: "tmax-high",
         kind: "record-high",
         years: 15,
-        value: 22.4,
-        previous: { value: 23.4, yearsAgo: 16 },
-        messageKey: "facts.appTmaxHigh",
+        value: 24.9,
+        messageKey: "facts.tmaxHigh",
         params: { years: 15 },
-        confidence: "medium",
+      }),
+      expect.objectContaining({
+        id: "tmax-near-record",
+        kind: "context",
+        messageKey: "facts.nearRecordHigh",
+        params: { tempDelta: 0.3, years: 30 },
       }),
     ]);
     expect(result.departures).toEqual([
@@ -87,6 +91,11 @@ describe("golden facts on recorded ERA5 history and forecasts", () => {
         messageKey: "facts.contrastYearsAgo",
         params: { ago: 2, past: "rainy", now: "cloudy" },
       }),
+      expect.objectContaining({
+        id: "rain-frequency",
+        messageKey: "facts.rainFrequency",
+        params: { count: 16, years: 30 },
+      }),
     ]);
     expect(departures.map((d) => [d.variable, d.delta])).toEqual([
       ["tmax", 2.3],
@@ -100,10 +109,14 @@ describe("golden facts on recorded ERA5 history and forecasts", () => {
     expect(facts[0]).toMatchObject({ id: "tmin-high", value: 18.3, confidence: "high" });
   });
 
-  it("Dubai: sunny as every recent year, so only the departures", () => {
+  it("Dubai: a long dry streak that is normal there, so it scores low", () => {
     const f = golden("dubai");
     const result = runFacts({ today: f.today, history: f.history, bias: f.bias, localDate });
-    expect(result.facts).toEqual([]);
+    expect(result.facts.map((fact) => [fact.id, fact.messageKey, fact.params])).toEqual([
+      ["dry-streak", "facts.dryStreak", { years: 29 }],
+      ["rain-frequency", "facts.neverRains", { years: 30 }],
+    ]);
+    expect(result.facts[0].score).toBeLessThan(4);
     expect(result.departures.map((d) => d.variable)).toEqual(["tmax", "tmin"]);
   });
 
@@ -116,6 +129,7 @@ describe("golden facts on recorded ERA5 history and forecasts", () => {
         messageKey: "facts.contrastYearsAgo",
         params: { ago: 3, past: "cloudy", now: "rainy" },
       }),
+      expect.objectContaining({ id: "rain-frequency", params: { count: 13, years: 30 } }),
     ]);
   });
 
@@ -231,7 +245,7 @@ describe("first-in and unusual detectors", () => {
     const fact = detector("dry-unusual").detect(day(localDate, { precip: 0 }), past, ctx);
     expect(fact).toMatchObject({
       kind: "unusual",
-      params: { rainy: 24, years: 30 },
+      params: { count: 24, years: 30 },
       messageKey: "facts.dryUnusual",
     });
     expect(detector("dry-unusual").detect(day(localDate, { precip: 0.5 }), past, ctx)).toBeNull();
@@ -275,7 +289,9 @@ describe("runFacts", () => {
 
   it("applies the bias before ranking", () => {
     const today = day(localDate, { tmax: 21 });
-    expect(runFacts({ today, history: history(), localDate }).facts[0]?.id).toBe("tmax-high");
+    expect(runFacts({ today, history: history(), localDate }).facts.map((f) => f.id)).toContain(
+      "tmax-high",
+    );
     const biased = runFacts({
       today,
       history: history(),
@@ -294,7 +310,10 @@ describe("runFacts", () => {
       history: past,
       localDate: leapDate,
     });
-    expect(facts[0]).toMatchObject({ id: "tmax-high", years: 30, messageKey: "facts.tmaxHighAll" });
+    expect(facts.find((f) => f.id === "tmax-high")).toMatchObject({
+      years: 30,
+      messageKey: "facts.tmaxHighAll",
+    });
   });
 
   it("returns nothing from an empty history", () => {
@@ -461,5 +480,148 @@ describe("last-year detector", () => {
     ).toBeNull();
     const gap = history().filter((d) => !d.date.startsWith("2025"));
     expect(detector("tmax-last-year").detect(day(localDate, { tmax: 40 }), gap, ctx)).toBeNull();
+  });
+});
+
+describe("more detectors", () => {
+  const sunny = { cloudMean: 10, sunshine: 30000, precip: 0 };
+
+  it("reports the first frost and the first dry day in N years", () => {
+    const frosty = history((ago) => ({ tmin: ago === 8 ? -2 : 4 }));
+    expect(detector("frost-first").detect(day(localDate, { tmin: -1 }), frosty, ctx)).toMatchObject(
+      {
+        messageKey: "facts.frostFirst",
+        years: 7,
+      },
+    );
+    const wet = history((ago) => ({ precip: ago === 6 ? 0 : 3 }));
+    expect(detector("dry-first").detect(day(localDate, { precip: 0 }), wet, ctx)).toMatchObject({
+      messageKey: "facts.dryFirst",
+      years: 5,
+    });
+  });
+
+  it("puts the threshold into the heat message", () => {
+    const fact = detector("heat-first").detect(day(localDate, { tmax: 36 }), history(), ctx);
+    expect(fact).toMatchObject({
+      messageKey: "facts.heatFirstAll",
+      params: { years: 30, temp: 35 },
+    });
+  });
+
+  it("reports rain on a usually dry day", () => {
+    const fact = detector("wet-unusual").detect(day(localDate, { precip: 8 }), history(), ctx);
+    expect(fact).toMatchObject({ kind: "unusual", params: { count: 30, years: 30 } });
+  });
+
+  it("counts streaks across years including today", () => {
+    const past = history((ago) => (ago <= 4 ? { precip: 5 } : { precip: 0 }));
+    expect(detector("rain-streak").detect(day(localDate, { precip: 3 }), past, ctx)).toMatchObject({
+      kind: "streak",
+      params: { years: 5 },
+    });
+    const warm = history((ago) => ({ tmax: ago <= 6 ? 25 : 18 }));
+    expect(detector("warm-streak").detect(day(localDate, { tmax: 24 }), warm, ctx)?.params).toEqual(
+      {
+        years: 7,
+      },
+    );
+  });
+
+  it("scores a streak low when the condition is normal there", () => {
+    const always = runFacts({
+      today: day(localDate, sunny),
+      history: history(() => sunny),
+      localDate,
+    });
+    const streak = always.facts.find((f) => f.id === "dry-streak");
+    expect(streak?.score ?? 0).toBeLessThan(2);
+  });
+
+  it("names the warmest year as context, with a last-year wording", () => {
+    const past = history((ago) => ({ tmax: ago === 1 ? 31 : ago === 12 ? 29 : 20 }));
+    expect(detector("warmest-ever").detect(day(localDate), past, ctx)).toMatchObject({
+      kind: "context",
+      messageKey: "facts.warmestEverLastYear",
+      params: { years: 30, ago: 1, temp: 31 },
+    });
+    const older = history((ago) => ({ tmax: ago === 12 ? 29 : 20 }));
+    expect(detector("warmest-ever").detect(day(localDate), older, ctx)?.params).toMatchObject({
+      ago: 12,
+    });
+  });
+
+  it("reports a warming trend between the first and last ten years", () => {
+    const past = history((ago) => ({ tmax: ago <= 10 ? 23 : 20 }));
+    expect(detector("tmax-trend").detect(day(localDate), past, ctx)).toMatchObject({
+      messageKey: "facts.trendWarmer",
+      params: { tempDelta: 3, span: 10, years: 30 },
+    });
+    expect(detector("tmax-trend").detect(day(localDate), history(), ctx)).toBeNull();
+  });
+
+  it("notices a value just short of the record", () => {
+    const past = history((ago) => ({ tmax: ago === 3 ? 26 : 20 }));
+    expect(
+      detector("tmax-near-record").detect(day(localDate, { tmax: 25.4 }), past, ctx),
+    ).toMatchObject({
+      params: { tempDelta: 0.6, years: 30 },
+    });
+    expect(detector("tmax-near-record").detect(day(localDate, { tmax: 27 }), past, ctx)).toBeNull();
+  });
+
+  it("describes how often it rains on this day", () => {
+    const past = history((ago) => ({ precip: ago % 3 === 0 ? 4 : 0 }));
+    expect(detector("rain-frequency").detect(day(localDate), past, ctx)).toMatchObject({
+      messageKey: "facts.rainFrequency",
+      params: { count: 10, years: 30 },
+    });
+    expect(detector("rain-frequency").detect(day(localDate), history(), ctx)?.messageKey).toBe(
+      "facts.neverRains",
+    );
+  });
+
+  it("reports a large gap between feels-like and actual temperatures", () => {
+    expect(
+      detector("feels-hotter").detect(day(localDate, { tmax: 30, appTmax: 36 }), [], ctx),
+    ).toMatchObject({
+      params: { tempDelta: 6 },
+    });
+    expect(
+      detector("feels-colder").detect(day(localDate, { tmin: 2, appTmin: -3 }), [], ctx)?.params,
+    ).toEqual({
+      tempDelta: 5,
+    });
+    expect(
+      detector("feels-hotter").detect(day(localDate, { tmax: 30, appTmax: 31 }), [], ctx),
+    ).toBeNull();
+  });
+
+  it("prefers the actual temperature record over the feels-like one", () => {
+    const past = history();
+    const { facts } = runFacts({
+      today: day(localDate, { tmax: 30, appTmax: 30 }),
+      history: past,
+      localDate,
+    });
+    expect(facts.find((f) => f.family === "day-temperature")?.id).toBe("tmax-high");
+  });
+
+  it("rotates context facts by date", () => {
+    const past = history((ago) => ({ tmax: ago <= 10 ? 23 : 20, precip: ago % 3 === 0 ? 4 : 0 }));
+    const pickFor = (/** @type {string} */ date) =>
+      runFacts({
+        today: day(date, { tmax: 21, precip: 0, cloudMean: 50 }),
+        history: past,
+        localDate: date,
+      })
+        .facts.filter((f) => f.kind === "context")
+        .map((f) => f.id)[0];
+    const picks = new Set(
+      ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04", "2026-10-05", "2026-10-06"].map(
+        pickFor,
+      ),
+    );
+    expect(picks.size).toBeGreaterThan(1);
   });
 });

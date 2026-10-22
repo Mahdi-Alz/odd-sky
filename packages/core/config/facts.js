@@ -6,18 +6,23 @@ export const FACT_SCORING = {
   magnitudeWeight: 1,
   magnitudeCap: 3,
   highConfidenceMargins: 2,
+  contextScore: 0.3,
 };
 
 export const FAMILY_WEIGHTS = {
   "day-temperature": 1,
   "night-temperature": 0.8,
+  "feels-like": 0.6,
   precipitation: 1,
   snow: 1.5,
+  frost: 1.2,
   wind: 0.6,
   sky: 0.4,
   humidity: 0.3,
   "temperature-range": 0.3,
   contrast: 0.9,
+  streak: 0.7,
+  context: 0,
 };
 
 /** @type {import("../types.js").RecordDetectorConfig[]} */
@@ -60,6 +65,7 @@ export const RECORD_DETECTORS = [
   },
   {
     id: "app-tmax-high",
+    bonus: -0.5,
     family: "day-temperature",
     variable: "appTmax",
     direction: "high",
@@ -68,7 +74,28 @@ export const RECORD_DETECTORS = [
     messageKey: "facts.appTmaxHigh",
   },
   {
+    id: "app-tmax-low",
+    bonus: -0.5,
+    family: "day-temperature",
+    variable: "appTmax",
+    direction: "low",
+    margin: 0.7,
+    unit: "C",
+    messageKey: "facts.appTmaxLow",
+  },
+  {
+    id: "app-tmin-high",
+    bonus: -0.5,
+    family: "night-temperature",
+    variable: "appTmin",
+    direction: "high",
+    margin: 0.7,
+    unit: "C",
+    messageKey: "facts.appTminHigh",
+  },
+  {
     id: "app-tmin-low",
+    bonus: -0.5,
     family: "night-temperature",
     variable: "appTmin",
     direction: "low",
@@ -87,6 +114,26 @@ export const RECORD_DETECTORS = [
     messageKey: "facts.precipHigh",
   },
   {
+    id: "precip-hours-high",
+    family: "precipitation",
+    variable: "precipHours",
+    direction: "high",
+    margin: 1,
+    unit: "h",
+    min: 6,
+    messageKey: "facts.precipHoursHigh",
+  },
+  {
+    id: "snow-high",
+    family: "snow",
+    variable: "snow",
+    direction: "high",
+    margin: 1,
+    unit: "cm",
+    min: 1,
+    messageKey: "facts.snowHigh",
+  },
+  {
     id: "gust-high",
     family: "wind",
     variable: "gustMax",
@@ -95,6 +142,26 @@ export const RECORD_DETECTORS = [
     unit: "km/h",
     min: 40,
     messageKey: "facts.gustHigh",
+  },
+  {
+    id: "wind-high",
+    family: "wind",
+    variable: "windMax",
+    direction: "high",
+    margin: 2,
+    unit: "km/h",
+    min: 25,
+    messageKey: "facts.windHigh",
+  },
+  {
+    id: "wind-low",
+    family: "wind",
+    variable: "windMax",
+    direction: "low",
+    margin: 1,
+    unit: "km/h",
+    max: 8,
+    messageKey: "facts.windLow",
   },
   {
     id: "cloud-high",
@@ -127,6 +194,26 @@ export const RECORD_DETECTORS = [
     messageKey: "facts.sunshineHigh",
   },
   {
+    id: "sunshine-low",
+    family: "sky",
+    variable: "sunshine",
+    direction: "low",
+    margin: 900,
+    unit: "s",
+    max: 7200,
+    messageKey: "facts.sunshineLow",
+  },
+  {
+    id: "rh-high",
+    family: "humidity",
+    variable: "rhMean",
+    direction: "high",
+    margin: 3,
+    unit: "%",
+    min: 80,
+    messageKey: "facts.rhHigh",
+  },
+  {
     id: "rh-low",
     family: "humidity",
     variable: "rhMean",
@@ -144,65 +231,17 @@ export const RECORD_DETECTORS = [
     unit: "C",
     messageKey: "facts.rangeHigh",
   },
-];
-
-/** @type {import("../types.js").FirstDetectorConfig[]} */
-export const FIRST_DETECTORS = [
   {
-    id: "snow-first",
-    family: "snow",
-    variable: "snow",
-    threshold: 0.5,
-    unit: "cm",
-    messageKey: "facts.snowFirst",
-  },
-  {
-    id: "rain-first",
-    family: "precipitation",
-    variable: "precip",
-    threshold: 1,
-    unit: "mm",
-    messageKey: "facts.rainFirst",
+    id: "range-low",
+    family: "temperature-range",
+    variable: "range",
+    direction: "low",
+    margin: 1,
+    unit: "C",
+    max: 5,
+    messageKey: "facts.rangeLow",
   },
 ];
-
-/** @type {import("../types.js").DryDetectorConfig[]} */
-export const DRY_DETECTORS = [
-  {
-    id: "dry-unusual",
-    family: "precipitation",
-    variable: "precip",
-    wetAt: 1,
-    dryBelow: 0.2,
-    minShare: 0.6,
-    unit: "mm",
-    messageKey: "facts.dryUnusual",
-  },
-];
-
-export const DAY_STATES = {
-  snowyFrom: 1,
-  rainyFrom: 2,
-  sunnyCloudMax: 30,
-  sunnySunshineMin: 6 * 3600,
-  sunnyPrecipMax: 0.5,
-  cloudyCloudMin: 80,
-};
-
-export const CONTRAST = {
-  id: "state-contrast",
-  family: "contrast",
-  lookbackYears: 3,
-  minRun: 2,
-  maxRun: 10,
-};
-
-export const LAST_YEAR = {
-  id: "tmax-last-year",
-  family: "day-temperature",
-  variable: /** @type {const} */ ("tmax"),
-  minDelta: 6,
-};
 
 /** @type {import("../types.js").RareDetectorConfig[]} */
 export const RARE_DETECTORS = [
@@ -251,6 +290,30 @@ export const RARE_DETECTORS = [
     messageKey: "facts.tminRareLow",
   },
   {
+    id: "app-tmax-rare-high",
+    bonus: -0.5,
+    family: "day-temperature",
+    variable: "appTmax",
+    direction: "high",
+    margin: 0.7,
+    maxCount: 3,
+    minYears: 20,
+    unit: "C",
+    messageKey: "facts.appTmaxRareHigh",
+  },
+  {
+    id: "app-tmin-rare-low",
+    bonus: -0.5,
+    family: "night-temperature",
+    variable: "appTmin",
+    direction: "low",
+    margin: 0.7,
+    maxCount: 3,
+    minYears: 20,
+    unit: "C",
+    messageKey: "facts.appTminRareLow",
+  },
+  {
     id: "precip-rare-high",
     family: "precipitation",
     variable: "precip",
@@ -263,6 +326,18 @@ export const RARE_DETECTORS = [
     messageKey: "facts.precipRareHigh",
   },
   {
+    id: "snow-rare-high",
+    family: "snow",
+    variable: "snow",
+    direction: "high",
+    margin: 1,
+    min: 1,
+    maxCount: 3,
+    minYears: 20,
+    unit: "cm",
+    messageKey: "facts.snowRareHigh",
+  },
+  {
     id: "gust-rare-high",
     family: "wind",
     variable: "gustMax",
@@ -273,6 +348,306 @@ export const RARE_DETECTORS = [
     minYears: 20,
     unit: "km/h",
     messageKey: "facts.gustRareHigh",
+  },
+  {
+    id: "wind-rare-high",
+    family: "wind",
+    variable: "windMax",
+    direction: "high",
+    margin: 2,
+    min: 20,
+    maxCount: 3,
+    minYears: 20,
+    unit: "km/h",
+    messageKey: "facts.windRareHigh",
+  },
+  {
+    id: "cloud-rare-high",
+    family: "sky",
+    variable: "cloudMean",
+    direction: "high",
+    margin: 5,
+    min: 70,
+    maxCount: 3,
+    minYears: 20,
+    unit: "%",
+    messageKey: "facts.cloudRareHigh",
+  },
+  {
+    id: "cloud-rare-low",
+    family: "sky",
+    variable: "cloudMean",
+    direction: "low",
+    margin: 5,
+    max: 30,
+    maxCount: 3,
+    minYears: 20,
+    unit: "%",
+    messageKey: "facts.cloudRareLow",
+  },
+  {
+    id: "sunshine-rare-high",
+    family: "sky",
+    variable: "sunshine",
+    direction: "high",
+    margin: 1800,
+    min: 21600,
+    maxCount: 3,
+    minYears: 20,
+    unit: "s",
+    messageKey: "facts.sunshineRareHigh",
+  },
+  {
+    id: "sunshine-rare-low",
+    family: "sky",
+    variable: "sunshine",
+    direction: "low",
+    margin: 900,
+    max: 14400,
+    maxCount: 3,
+    minYears: 20,
+    unit: "s",
+    messageKey: "facts.sunshineRareLow",
+  },
+  {
+    id: "rh-rare-high",
+    family: "humidity",
+    variable: "rhMean",
+    direction: "high",
+    margin: 3,
+    min: 70,
+    maxCount: 3,
+    minYears: 20,
+    unit: "%",
+    messageKey: "facts.rhRareHigh",
+  },
+  {
+    id: "rh-rare-low",
+    family: "humidity",
+    variable: "rhMean",
+    direction: "low",
+    margin: 3,
+    maxCount: 3,
+    minYears: 20,
+    unit: "%",
+    messageKey: "facts.rhRareLow",
+  },
+  {
+    id: "range-rare-high",
+    family: "temperature-range",
+    variable: "range",
+    direction: "high",
+    margin: 1,
+    maxCount: 3,
+    minYears: 20,
+    unit: "C",
+    messageKey: "facts.rangeRareHigh",
+  },
+];
+
+/** @type {import("../types.js").FirstDetectorConfig[]} */
+export const FIRST_DETECTORS = [
+  {
+    id: "snow-first",
+    family: "snow",
+    condition: { variable: "snow", atLeast: 0.5 },
+    unit: "cm",
+    messageKey: "facts.snowFirst",
+  },
+  {
+    id: "rain-first",
+    family: "precipitation",
+    condition: { variable: "precip", atLeast: 1 },
+    unit: "mm",
+    messageKey: "facts.rainFirst",
+  },
+  {
+    id: "dry-first",
+    family: "precipitation",
+    condition: { variable: "precip", atMost: 0.1 },
+    unit: "mm",
+    messageKey: "facts.dryFirst",
+  },
+  {
+    id: "frost-first",
+    family: "frost",
+    condition: { variable: "tmin", atMost: 0 },
+    unit: "C",
+    messageKey: "facts.frostFirst",
+  },
+  {
+    id: "heat-first",
+    family: "day-temperature",
+    condition: { variable: "tmax", atLeast: 35 },
+    unit: "C",
+    messageKey: "facts.heatFirst",
+    threshold: 35,
+  },
+  {
+    id: "sunny-first",
+    family: "sky",
+    condition: { state: "sunny" },
+    unit: "",
+    messageKey: "facts.sunnyFirst",
+  },
+];
+
+/** @type {import("../types.js").UsualDetectorConfig[]} */
+export const USUAL_DETECTORS = [
+  {
+    id: "dry-unusual",
+    family: "precipitation",
+    kind: "unusual",
+    today: { variable: "precip", atMost: 0.19 },
+    past: { variable: "precip", atLeast: 1 },
+    minShare: 0.6,
+    messageKey: "facts.dryUnusual",
+  },
+  {
+    id: "wet-unusual",
+    family: "precipitation",
+    kind: "unusual",
+    today: { variable: "precip", atLeast: 2 },
+    past: { variable: "precip", atMost: 0.99 },
+    minShare: 0.8,
+    messageKey: "facts.wetUnusual",
+  },
+  {
+    id: "sunny-unusual",
+    family: "sky",
+    kind: "unusual",
+    today: { state: "sunny" },
+    past: { state: "cloudy" },
+    minShare: 0.5,
+    messageKey: "facts.sunnyUnusual",
+  },
+  {
+    id: "cloudy-unusual",
+    family: "sky",
+    kind: "unusual",
+    today: { state: "cloudy" },
+    past: { state: "sunny" },
+    minShare: 0.6,
+    messageKey: "facts.cloudyUnusual",
+  },
+  {
+    id: "rain-as-usual",
+    family: "precipitation",
+    kind: "context",
+    today: { variable: "precip", atLeast: 1 },
+    past: { variable: "precip", atLeast: 1 },
+    minShare: 0.5,
+    messageKey: "facts.rainAsUsual",
+  },
+];
+
+/** @type {import("../types.js").StreakDetectorConfig[]} */
+export const STREAK_DETECTORS = [
+  {
+    id: "rain-streak",
+    family: "streak",
+    condition: { variable: "precip", atLeast: 1 },
+    minRun: 3,
+    messageKey: "facts.rainStreak",
+  },
+  {
+    id: "dry-streak",
+    family: "streak",
+    condition: { variable: "precip", atMost: 0.1 },
+    minRun: 10,
+    messageKey: "facts.dryStreak",
+  },
+  {
+    id: "sunny-streak",
+    family: "streak",
+    condition: { state: "sunny" },
+    minRun: 5,
+    messageKey: "facts.sunnyStreak",
+  },
+  {
+    id: "warm-streak",
+    family: "streak",
+    condition: { variable: "tmax", aboveMean: true },
+    minRun: 5,
+    messageKey: "facts.warmStreak",
+  },
+  {
+    id: "cool-streak",
+    family: "streak",
+    condition: { variable: "tmax", belowMean: true },
+    minRun: 5,
+    messageKey: "facts.coolStreak",
+  },
+];
+
+export const DAY_STATES = {
+  snowyFrom: 1,
+  rainyFrom: 2,
+  sunnyCloudMax: 30,
+  sunnySunshineMin: 6 * 3600,
+  sunnyPrecipMax: 0.5,
+  cloudyCloudMin: 80,
+};
+
+export const CONTRAST = {
+  id: "state-contrast",
+  family: "contrast",
+  lookbackYears: 3,
+  minRun: 2,
+  maxRun: 10,
+};
+
+/** @type {import("../types.js").LastYearDetectorConfig[]} */
+export const LAST_YEAR_DETECTORS = [
+  {
+    id: "tmax-last-year",
+    family: "day-temperature",
+    variable: "tmax",
+    minDelta: 6,
+    messageKeys: { warmer: "facts.warmerThanLastYear", cooler: "facts.coolerThanLastYear" },
+  },
+  {
+    id: "tmin-last-year",
+    family: "night-temperature",
+    variable: "tmin",
+    minDelta: 6,
+    messageKeys: {
+      warmer: "facts.warmerNightThanLastYear",
+      cooler: "facts.coolerNightThanLastYear",
+    },
+  },
+];
+
+export const STREAK_SCORING = {
+  maxRarity: 30,
+};
+
+export const CONTEXT = {
+  minYears: 20,
+  trendYears: 10,
+  trendMinDelta: 1,
+  nearRecordWithin: 1,
+  rainyAt: 1,
+  frequencyMinShare: 0.3,
+};
+
+/** @type {import("../types.js").FeelsGapDetectorConfig[]} */
+export const FEELS_GAP_DETECTORS = [
+  {
+    id: "feels-hotter",
+    variable: "appTmax",
+    actual: "tmax",
+    direction: "above",
+    minGap: 4,
+    messageKey: "facts.feelsHotter",
+  },
+  {
+    id: "feels-colder",
+    variable: "appTmin",
+    actual: "tmin",
+    direction: "below",
+    minGap: 4,
+    messageKey: "facts.feelsColder",
   },
 ];
 

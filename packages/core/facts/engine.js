@@ -28,6 +28,7 @@ export const scoreCandidate = (candidate) => {
   const score =
     FACT_SCORING.rarityWeight * Math.log(candidate.rarity ?? candidate.years) +
     FACT_SCORING.magnitudeWeight * candidate.magnitude +
+    (candidate.bonus ?? 0) +
     familyWeight;
   return {
     id: candidate.detector,
@@ -45,6 +46,26 @@ export const scoreCandidate = (candidate) => {
     params: candidate.params,
   };
 };
+
+/** @param {string} text */
+const hash = (text) => {
+  let value = 0;
+  for (const char of text) value = (value * 31 + char.charCodeAt(0)) >>> 0;
+  return value;
+};
+
+/**
+ * @param {import("../types.js").Fact} fact
+ * @param {string} localDate
+ */
+export const rotateContext = (fact, localDate) =>
+  fact.kind === "context"
+    ? {
+        ...fact,
+        score:
+          Math.round((fact.score + (hash(`${localDate}:${fact.id}`) % 100) / 1000) * 1000) / 1000,
+      }
+    : fact;
 
 /** @param {import("../types.js").Fact[]} facts */
 export const selectFacts = (facts) => {
@@ -106,12 +127,15 @@ export const runFacts = ({
   const candidates = [];
   for (const detector of DETECTORS) {
     const candidate = detector.detect(corrected, history, ctx);
-    if (candidate && (candidate.kind === "contrast" || candidate.years >= FACT_SCORING.minYears)) {
+    const needsYears = candidate?.kind.startsWith("record") || candidate?.kind === "first-in";
+    if (candidate && (!needsYears || candidate.years >= FACT_SCORING.minYears)) {
       candidates.push(candidate);
     }
   }
   return {
-    facts: selectFacts(candidates.map(scoreCandidate)),
+    facts: selectFacts(
+      candidates.map(scoreCandidate).map((fact) => rotateContext(fact, localDate)),
+    ),
     departures: /** @type {import("../types.js").Departure[]} */ (
       DEPARTURE.variables
         .map((variable) => departureFor(corrected, history, variable))

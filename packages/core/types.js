@@ -94,7 +94,7 @@
  */
 
 /**
- * @typedef {'record-high' | 'record-low' | 'first-in' | 'unusual' | 'rare-high' | 'rare-low' | 'contrast'} FactKind
+ * @typedef {'record-high' | 'record-low' | 'first-in' | 'unusual' | 'rare-high' | 'rare-low' | 'contrast' | 'streak' | 'context'} FactKind
  */
 
 /**
@@ -152,6 +152,7 @@
  * @property {string} unit
  * @property {number} magnitude
  * @property {number} [rarity]
+ * @property {number} [bonus]
  * @property {'high' | 'medium'} confidence
  * @property {string} messageKey
  * @property {Record<string, number | string>} params
@@ -187,16 +188,66 @@
  * @property {number} [min]
  * @property {number} [max]
  * @property {string} messageKey
+ * @property {number} [bonus]
+ */
+
+/**
+ * @typedef {Object} DayCondition
+ * @property {FactVariable} [variable]
+ * @property {number} [atLeast]
+ * @property {number} [atMost]
+ * @property {boolean} [aboveMean]
+ * @property {boolean} [belowMean]
+ * @property {DayState} [state]
  */
 
 /**
  * @typedef {Object} FirstDetectorConfig
  * @property {string} id
  * @property {string} family
- * @property {FactVariable} variable
- * @property {number} threshold
+ * @property {DayCondition} condition
  * @property {string} unit
  * @property {string} messageKey
+ * @property {number} [threshold]
+ */
+
+/**
+ * @typedef {Object} UsualDetectorConfig
+ * @property {string} id
+ * @property {string} family
+ * @property {'unusual' | 'context'} kind
+ * @property {DayCondition} today
+ * @property {DayCondition} past
+ * @property {number} minShare
+ * @property {string} messageKey
+ */
+
+/**
+ * @typedef {Object} StreakDetectorConfig
+ * @property {string} id
+ * @property {string} family
+ * @property {DayCondition} condition
+ * @property {number} minRun
+ * @property {string} messageKey
+ */
+
+/**
+ * @typedef {Object} FeelsGapDetectorConfig
+ * @property {string} id
+ * @property {FactVariable} variable
+ * @property {FactVariable} actual
+ * @property {'above' | 'below'} direction
+ * @property {number} minGap
+ * @property {string} messageKey
+ */
+
+/**
+ * @typedef {Object} LastYearDetectorConfig
+ * @property {string} id
+ * @property {string} family
+ * @property {FactVariable} variable
+ * @property {number} minDelta
+ * @property {{ warmer: string, cooler: string }} messageKeys
  */
 
 /**
@@ -209,24 +260,14 @@
  * @property {number} maxCount
  * @property {number} minYears
  * @property {number} [min]
+ * @property {number} [max]
  * @property {string} unit
  * @property {string} messageKey
+ * @property {number} [bonus]
  */
 
 /**
  * @typedef {'snowy' | 'rainy' | 'sunny' | 'cloudy'} DayState
- */
-
-/**
- * @typedef {Object} DryDetectorConfig
- * @property {string} id
- * @property {string} family
- * @property {FactVariable} variable
- * @property {number} wetAt
- * @property {number} dryBelow
- * @property {number} minShare
- * @property {string} unit
- * @property {string} messageKey
  */
 
 /**

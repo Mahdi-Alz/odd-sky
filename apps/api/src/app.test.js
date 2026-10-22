@@ -153,7 +153,7 @@ describe("GET /api/facts", () => {
     const res = await app.request(tehran);
     expect(res.status).toBe(503);
     expect(await res.json()).toEqual({ error: "forecast-unavailable" });
-    expect(await cache.get("facts:35.7,51.4:2026-10-22:v3")).toBeNull();
+    expect(await cache.get("facts:35.7,51.4:2026-10-22:v4")).toBeNull();
   });
 
   it("answers 503 when no history could be fetched", async () => {
@@ -161,7 +161,7 @@ describe("GET /api/facts", () => {
     const res = await app.request(tehran);
     expect(res.status).toBe(503);
     expect(Number(res.headers.get("retry-after"))).toBeGreaterThan(0);
-    expect(await cache.get("facts:35.7,51.4:2026-10-22:v3")).toBeNull();
+    expect(await cache.get("facts:35.7,51.4:2026-10-22:v4")).toBeNull();
   });
 
   it("counts weighted Open-Meteo calls in the quota", async () => {

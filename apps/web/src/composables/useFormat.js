@@ -68,6 +68,7 @@ export const useFormat = () => {
   const factParam = (key, value) => {
     if (key === "past" || key === "now") return t(`facts.states.${value}`);
     if (key === "tempDelta") return formatTempDelta(value);
+    if (key === "temp") return formatTemp(value);
     return typeof value === "number" ? formatNumber(value) : value;
   };
 
@@ -96,8 +97,11 @@ export const useFormat = () => {
     return "bg-white/60";
   };
 
-  const formatTempDelta = (celsius) =>
-    `${formatNumber(Math.abs(toDisplayTempDelta(celsius, settings.units)))}°`;
+  const formatTempDelta = (celsius) => {
+    const value = Math.abs(toDisplayTempDelta(celsius, settings.units));
+    if (value >= 0.95) return `${formatNumber(value)}°`;
+    return `${new Intl.NumberFormat(settings.locale, { maximumFractionDigits: 1 }).format(value)}°`;
+  };
 
   const departureLines = (departures = []) =>
     departures
