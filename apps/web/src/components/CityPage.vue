@@ -23,7 +23,7 @@ const props = defineProps({
 const emit = defineEmits(["retry"]);
 
 const { t } = useI18n();
-const { formatTemp, formatTempValue, placeDetail, departureText } = useFormat();
+const { formatTemp, formatTempValue, placeDetail, departureLines } = useFormat();
 const { label: localTime } = useLocalClock(() => props.place.timezone);
 const { rows: activityRows } = useActivities(() => props.forecast);
 
@@ -35,12 +35,14 @@ const sky = computed(() =>
 );
 const today = computed(() => props.forecast?.daily[0] ?? null);
 const hourly = computed(() => props.forecast?.hourly ?? []);
-const departure = computed(() =>
+const departures = computed(() =>
   props.facts && props.forecast?.localDate === props.facts.localDate
-    ? departureText(props.facts.departure)
-    : "",
+    ? departureLines(props.facts.departures)
+    : [],
 );
-const hasFacts = computed(() => (props.facts?.facts.length ?? 0) > 0 || Boolean(departure.value));
+const hasFacts = computed(
+  () => (props.facts?.facts.length ?? 0) > 0 || departures.value.length > 0,
+);
 </script>
 
 <template>
@@ -92,7 +94,7 @@ const hasFacts = computed(() => (props.facts?.facts.length ?? 0) > 0 || Boolean(
           <p v-if="error" class="mt-3 text-xs text-white/70">{{ t("status.stale") }}</p>
         </div>
 
-        <FactsCard v-if="hasFacts" :facts="facts" :departure="departure" />
+        <FactsCard v-if="hasFacts" :facts="facts" :departures="departures" />
         <HourlyStrip v-if="hourly.length" :hourly="hourly" />
         <ActivitiesCard v-if="activityRows.length" :rows="activityRows" />
         <DailyForecast :daily="forecast.daily" />

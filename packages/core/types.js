@@ -94,7 +94,7 @@
  */
 
 /**
- * @typedef {'record-high' | 'record-low' | 'first-in' | 'unusual'} FactKind
+ * @typedef {'record-high' | 'record-low' | 'first-in' | 'unusual' | 'rare-high' | 'rare-low' | 'contrast'} FactKind
  */
 
 /**
@@ -137,7 +137,7 @@
  * @property {'era5'} source
  * @property {number} yearsAvailable
  * @property {Fact[]} facts
- * @property {Departure | null} departure
+ * @property {Departure[]} departures
  */
 
 /**
@@ -151,6 +151,7 @@
  * @property {FactPrevious | null} previous
  * @property {string} unit
  * @property {number} magnitude
+ * @property {number} [rarity]
  * @property {'high' | 'medium'} confidence
  * @property {string} messageKey
  * @property {Record<string, number | string>} params
@@ -196,6 +197,24 @@
  * @property {number} threshold
  * @property {string} unit
  * @property {string} messageKey
+ */
+
+/**
+ * @typedef {Object} RareDetectorConfig
+ * @property {string} id
+ * @property {string} family
+ * @property {FactVariable} variable
+ * @property {'high' | 'low'} direction
+ * @property {number} margin
+ * @property {number} maxCount
+ * @property {number} minYears
+ * @property {number} [min]
+ * @property {string} unit
+ * @property {string} messageKey
+ */
+
+/**
+ * @typedef {'snowy' | 'rainy' | 'sunny' | 'cloudy'} DayState
  */
 
 /**

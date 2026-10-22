@@ -7,7 +7,7 @@ import { cache } from "../storage";
 
 const forecastKey = (place) => `forecast:v4:${place.id}`;
 
-const factsKey = (place, localDate) => `facts:v3:${locationKey(place.lat, place.lon)}:${localDate}`;
+const factsKey = (place, localDate) => `facts:v4:${locationKey(place.lat, place.lon)}:${localDate}`;
 
 const cachedFacts = async (place) => {
   const cached = await cache.get(factsKey(place, localDateIn(place.timezone)));

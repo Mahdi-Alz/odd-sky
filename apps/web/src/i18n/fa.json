@@ -77,7 +77,24 @@
     "rainFirstAll": "نخستین بارانِ {date} در دست‌کم {years} سال گذشته",
     "dryUnusual": "{date} معمولاً بارانی است ({rainy} سال از {years} سال)، اما امروز خشک است",
     "about": "دربارهٔ این مقایسه",
-    "closeAbout": "بستن"
+    "closeAbout": "بستن",
+    "tmaxRareHigh": "در {years} سال گذشته فقط {count} بار {date} این‌قدر گرم بوده است",
+    "tmaxRareLow": "در {years} سال گذشته فقط {count} بار {date} این‌قدر خنک بوده است",
+    "tminRareHigh": "در {years} سال گذشته فقط {count} بار شبِ {date} این‌قدر گرم بوده است",
+    "tminRareLow": "در {years} سال گذشته فقط {count} بار شبِ {date} این‌قدر سرد بوده است",
+    "precipRareHigh": "در {years} سال گذشته فقط {count} بار {date} این‌قدر پربارش بوده است",
+    "gustRareHigh": "در {years} سال گذشته فقط {count} بار در {date} چنین تندبادی وزیده است",
+    "contrastLastYear": "پارسال {date} {past} بود، امروز {now} است",
+    "contrastYearsAgo": "{ago} سال پیش {date} {past} بود، امروز {now} است",
+    "contrastRun": "{date} در هر {years} سال گذشته {past} بود، امروز {now} است",
+    "warmerThanLastYear": "بیشینهٔ امروز {tempDelta} گرم‌تر از {date} پارسال است",
+    "coolerThanLastYear": "بیشینهٔ امروز {tempDelta} خنک‌تر از {date} پارسال است",
+    "states": {
+      "snowy": "برفی",
+      "rainy": "بارانی",
+      "sunny": "آفتابی",
+      "cloudy": "ابری"
+    }
   },
   "activities": {
     "title": "فعالیت‌ها",
@@ -247,8 +264,14 @@
     "high": "بیشینه",
     "low": "کمینه",
     "departure": {
-      "above": "{delta} بالاتر از میانگین بیشینهٔ {years} سال",
-      "below": "{delta} پایین‌تر از میانگین بیشینهٔ {years} سال"
+      "tmax": {
+        "above": "بیشینه: {delta} بالاتر از میانگین {years} سال",
+        "below": "بیشینه: {delta} پایین‌تر از میانگین {years} سال"
+      },
+      "tmin": {
+        "above": "کمینه: {delta} بالاتر از میانگین {years} سال",
+        "below": "کمینه: {delta} پایین‌تر از میانگین {years} سال"
+      }
     }
   },
   "status": {

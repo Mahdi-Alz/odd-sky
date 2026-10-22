@@ -77,7 +77,24 @@
     "rainFirstAll": "First rain on {date} in at least {years} years",
     "dryUnusual": "{date} is usually wet (rain in {rainy} of {years} years), but dry today",
     "about": "About this comparison",
-    "closeAbout": "Close"
+    "closeAbout": "Close",
+    "tmaxRareHigh": "Only {count} of the past {years} years were this warm on {date}",
+    "tmaxRareLow": "Only {count} of the past {years} years were this cool on {date}",
+    "tminRareHigh": "Only {count} of the past {years} years had a night this warm on {date}",
+    "tminRareLow": "Only {count} of the past {years} years had a night this cold on {date}",
+    "precipRareHigh": "Only {count} of the past {years} years were this wet on {date}",
+    "gustRareHigh": "Only {count} of the past {years} years had gusts this strong on {date}",
+    "contrastLastYear": "Last year {date} was {past}; today it's {now}",
+    "contrastYearsAgo": "{ago} years ago {date} was {past}; today it's {now}",
+    "contrastRun": "{date} was {past} in each of the last {years} years; today it's {now}",
+    "warmerThanLastYear": "Today's high is {tempDelta} warmer than on {date} last year",
+    "coolerThanLastYear": "Today's high is {tempDelta} cooler than on {date} last year",
+    "states": {
+      "snowy": "snowy",
+      "rainy": "rainy",
+      "sunny": "sunny",
+      "cloudy": "cloudy"
+    }
   },
   "activities": {
     "title": "Activities",
@@ -247,8 +264,14 @@
     "high": "H:",
     "low": "L:",
     "departure": {
-      "above": "{delta} above the {years}-year average high",
-      "below": "{delta} below the {years}-year average high"
+      "tmax": {
+        "above": "High: {delta} above the {years}-year average",
+        "below": "High: {delta} below the {years}-year average"
+      },
+      "tmin": {
+        "above": "Low: {delta} above the {years}-year average",
+        "below": "Low: {delta} below the {years}-year average"
+      }
     }
   },
   "status": {

@@ -92,7 +92,12 @@ export const factsRoute = (deps) => {
 
     const offsets =
       bias.status === "fulfilled" ? bias.value.offsets : (await deps.history.getBias(key)).offsets;
-    const { facts, departure } = runFacts({ today: todayStats, history, bias: offsets, localDate });
+    const { facts, departures } = runFacts({
+      today: todayStats,
+      history,
+      bias: offsets,
+      localDate,
+    });
     /** @type {import("@odd-sky/core/types").FactsResponse} */
     const response = {
       locationKey: key,
@@ -101,7 +106,7 @@ export const factsRoute = (deps) => {
       source: "era5",
       yearsAvailable: years,
       facts,
-      departure,
+      departures,
     };
     const ttl = Math.min(
       years === HISTORY.years ? FACTS_CACHE.maxTtlMs : FACTS_CACHE.partialTtlMs,

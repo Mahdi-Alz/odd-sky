@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { historyDates } from "../dates/index.js";
 import { correctToday, departureFor, runFacts, selectFacts } from "./engine.js";
-import { DETECTORS } from "./detectors.js";
+import { DETECTORS, dayState } from "./detectors.js";
 
 /** @param {string} name */
 const golden = (name) =>
@@ -58,18 +58,20 @@ describe("golden facts on recorded ERA5 history and forecasts", () => {
         confidence: "medium",
       }),
     ]);
-    expect(result.departure).toEqual({
-      variable: "tmax",
-      value: 24.9,
-      mean: 21.5,
-      delta: 3.4,
-      years: 30,
-    });
+    expect(result.departures).toEqual([
+      { variable: "tmax", value: 24.9, mean: 21.5, delta: 3.4, years: 30 },
+      expect.objectContaining({ variable: "tmin", delta: 2.8, years: 30 }),
+    ]);
   });
 
-  it("Rasht: warmest night in all 30 years of data after bias correction", () => {
+  it("Rasht: warmest night in all 30 years, and rainy two years ago", () => {
     const f = golden("rasht");
-    const { facts } = runFacts({ today: f.today, history: f.history, bias: f.bias, localDate });
+    const { facts, departures } = runFacts({
+      today: f.today,
+      history: f.history,
+      bias: f.bias,
+      localDate,
+    });
     expect(facts).toEqual([
       expect.objectContaining({
         id: "tmin-high",
@@ -79,6 +81,16 @@ describe("golden facts on recorded ERA5 history and forecasts", () => {
         messageKey: "facts.tminHighAll",
         params: { years: 30 },
       }),
+      expect.objectContaining({
+        id: "state-contrast",
+        kind: "contrast",
+        messageKey: "facts.contrastYearsAgo",
+        params: { ago: 2, past: "rainy", now: "cloudy" },
+      }),
+    ]);
+    expect(departures.map((d) => [d.variable, d.delta])).toEqual([
+      ["tmax", 2.3],
+      ["tmin", 3.8],
     ]);
   });
 
@@ -88,13 +100,23 @@ describe("golden facts on recorded ERA5 history and forecasts", () => {
     expect(facts[0]).toMatchObject({ id: "tmin-high", value: 18.3, confidence: "high" });
   });
 
-  it("Dubai and Oslo: nothing unusual, so a plain forecast", () => {
-    for (const name of ["dubai", "oslo"]) {
-      const f = golden(name);
-      const result = runFacts({ today: f.today, history: f.history, bias: f.bias, localDate });
-      expect(result.facts).toEqual([]);
-      expect(result.departure?.years).toBe(30);
-    }
+  it("Dubai: sunny as every recent year, so only the departures", () => {
+    const f = golden("dubai");
+    const result = runFacts({ today: f.today, history: f.history, bias: f.bias, localDate });
+    expect(result.facts).toEqual([]);
+    expect(result.departures.map((d) => d.variable)).toEqual(["tmax", "tmin"]);
+  });
+
+  it("Oslo: rain today where it was cloudy three years ago", () => {
+    const f = golden("oslo");
+    const { facts } = runFacts({ today: f.today, history: f.history, bias: f.bias, localDate });
+    expect(facts).toEqual([
+      expect.objectContaining({
+        id: "state-contrast",
+        messageKey: "facts.contrastYearsAgo",
+        params: { ago: 3, past: "cloudy", now: "rainy" },
+      }),
+    ]);
   });
 
   it("returns the Fact contract for every fact", () => {
@@ -278,7 +300,7 @@ describe("runFacts", () => {
   it("returns nothing from an empty history", () => {
     expect(runFacts({ today: day(localDate, { tmax: 40 }), history: [], localDate })).toEqual({
       facts: [],
-      departure: null,
+      departures: [],
     });
   });
 });
@@ -315,10 +337,129 @@ describe("helpers", () => {
   });
 
   it("needs enough years for a departure", () => {
-    expect(departureFor(day(localDate), history().slice(0, 9))).toBeNull();
-    expect(departureFor(day(localDate, { tmax: 23 }), history())).toMatchObject({
+    expect(departureFor(day(localDate), history().slice(0, 9), "tmax")).toBeNull();
+    expect(departureFor(day(localDate, { tmax: 23 }), history(), "tmax")).toMatchObject({
       delta: 3,
       mean: 20,
     });
+  });
+});
+
+describe("rare detectors", () => {
+  it("says how few years were this warm when it is not a record", () => {
+    const past = history((ago) => ({ tmax: ago === 2 || ago === 9 ? 30 : 20 }));
+    const fact = detector("tmax-rare-high").detect(day(localDate, { tmax: 26 }), past, ctx);
+    expect(fact).toMatchObject({
+      kind: "rare-high",
+      params: { count: 2, years: 30 },
+      messageKey: "facts.tmaxRareHigh",
+    });
+  });
+
+  it("leaves records to the record detector and skips common values", () => {
+    expect(
+      detector("tmax-rare-high").detect(day(localDate, { tmax: 26 }), history(), ctx),
+    ).toBeNull();
+    const many = history((ago) => ({ tmax: ago <= 4 ? 30 : 20 }));
+    expect(detector("tmax-rare-high").detect(day(localDate, { tmax: 26 }), many, ctx)).toBeNull();
+  });
+
+  it("needs enough years", () => {
+    const past = history((ago) => ({ tmax: ago === 2 ? 30 : 20 })).slice(0, 19);
+    expect(detector("tmax-rare-high").detect(day(localDate, { tmax: 26 }), past, ctx)).toBeNull();
+  });
+});
+
+describe("day states", () => {
+  it.each([
+    [{ snow: 2, precip: 5 }, "snowy"],
+    [{ precip: 3 }, "rainy"],
+    [{ cloudMean: 10, sunshine: 30000, precip: 0 }, "sunny"],
+    [{ cloudMean: 90, precip: 0.5 }, "cloudy"],
+    [{ cloudMean: 50, precip: 0 }, null],
+    [{ cloudMean: 10, sunshine: 10000, precip: 0 }, null],
+  ])("classifies %o as %s", (values, expected) => {
+    expect(dayState(day(localDate, values))).toBe(expected);
+  });
+});
+
+describe("contrast detector", () => {
+  const sunny = { cloudMean: 10, sunshine: 30000, precip: 0 };
+  const rainy = { precip: 6, cloudMean: 90 };
+  const snowy = { snow: 3, precip: 4, cloudMean: 95 };
+
+  it("compares with last year", () => {
+    const past = history((ago) => (ago === 1 ? rainy : sunny));
+    const fact = detector("state-contrast").detect(day(localDate, sunny), past, ctx);
+    expect(fact).toMatchObject({
+      messageKey: "facts.contrastLastYear",
+      params: { ago: 1, past: "rainy", now: "sunny" },
+    });
+  });
+
+  it("reports a run of years with the same other state", () => {
+    const past = history((ago) => (ago <= 3 ? { cloudMean: 90, precip: 0 } : sunny));
+    const fact = detector("state-contrast").detect(day(localDate, sunny), past, ctx);
+    expect(fact).toMatchObject({
+      messageKey: "facts.contrastRun",
+      params: { years: 3, past: "cloudy", now: "sunny" },
+    });
+  });
+
+  it("looks back a few years for the nearest different day", () => {
+    const past = history((ago) => (ago === 2 ? snowy : sunny));
+    const fact = detector("state-contrast").detect(day(localDate, sunny), past, ctx);
+    expect(fact).toMatchObject({
+      messageKey: "facts.contrastYearsAgo",
+      params: { ago: 2, past: "snowy", now: "sunny" },
+    });
+  });
+
+  it("says nothing when recent years looked the same or today is mixed", () => {
+    expect(
+      detector("state-contrast").detect(
+        day(localDate, sunny),
+        history(() => sunny),
+        ctx,
+      ),
+    ).toBeNull();
+    expect(
+      detector("state-contrast").detect(
+        day(localDate, { cloudMean: 50 }),
+        history(() => rainy),
+        ctx,
+      ),
+    ).toBeNull();
+  });
+
+  it("is kept even though it covers fewer than minYears", () => {
+    const past = history((ago) => (ago === 1 ? rainy : sunny));
+    const { facts } = runFacts({ today: day(localDate, sunny), history: past, localDate });
+    expect(facts.map((f) => f.id)).toContain("state-contrast");
+  });
+});
+
+describe("last-year detector", () => {
+  it("reports a big change in the high since last year", () => {
+    const past = history((ago) => (ago === 1 ? { tmax: 12 } : { tmax: 20 }));
+    expect(
+      detector("tmax-last-year").detect(day(localDate, { tmax: 19 }), past, ctx),
+    ).toMatchObject({
+      messageKey: "facts.warmerThanLastYear",
+      params: { tempDelta: 7 },
+      previous: { value: 12, yearsAgo: 1 },
+    });
+    const cold = history((ago) => (ago === 1 ? { tmax: 27 } : { tmax: 20 }));
+    expect(
+      detector("tmax-last-year").detect(day(localDate, { tmax: 20 }), cold, ctx)?.messageKey,
+    ).toBe("facts.coolerThanLastYear");
+  });
+
+  it("ignores small changes and a missing last year", () => {
+    expect(
+      detector("tmax-last-year").detect(day(localDate, { tmax: 25 }), history(), ctx),
+    ).toBeNull();
+    const gap = history().filter((d) => !d.date.startsWith("2025"));
+    expect(detector("tmax-last-year").detect(day(localDate, { tmax: 40 }), gap, ctx)).toBeNull();
   });
 });

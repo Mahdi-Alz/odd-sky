@@ -65,13 +65,16 @@ export const useFormat = () => {
   const factDate = (isoDate) =>
     formatIsoDate(isoDate, settings.locale, { month: "long", day: "numeric" });
 
+  const factParam = (key, value) => {
+    if (key === "past" || key === "now") return t(`facts.states.${value}`);
+    if (key === "tempDelta") return formatTempDelta(value);
+    return typeof value === "number" ? formatNumber(value) : value;
+  };
+
   const factText = (fact, localDate) =>
     t(fact.messageKey, {
       ...Object.fromEntries(
-        Object.entries(fact.params).map(([key, value]) => [
-          key,
-          typeof value === "number" ? formatNumber(value) : value,
-        ]),
+        Object.entries(fact.params).map(([key, value]) => [key, factParam(key, value)]),
       ),
       date: factDate(localDate),
     });
@@ -84,17 +87,27 @@ export const useFormat = () => {
   const factTone = (fact) => {
     if (fact.kind === "unusual") return "bg-warm";
     if (fact.family === "precipitation" || fact.family === "snow") return "bg-cool";
-    if (fact.kind === "record-high") return "bg-warm";
-    if (fact.kind === "record-low") return "bg-cool";
+    if (fact.kind === "record-high" || fact.kind === "rare-high") return "bg-warm";
+    if (fact.kind === "record-low" || fact.kind === "rare-low") return "bg-cool";
+    if (fact.kind === "contrast" && fact.params.now === "sunny") return "bg-warm";
+    if (fact.kind === "contrast" && fact.params.now !== undefined) return "bg-cool";
+    if (fact.messageKey === "facts.warmerThanLastYear") return "bg-warm";
+    if (fact.messageKey === "facts.coolerThanLastYear") return "bg-cool";
     return "bg-white/60";
   };
 
-  const departureText = (departure) => {
-    if (!departure || Math.abs(departure.delta) < DEPARTURE.minDelta) return "";
-    const delta = `${formatNumber(Math.abs(toDisplayTempDelta(departure.delta, settings.units)))}°`;
-    const key = departure.delta > 0 ? "page.departure.above" : "page.departure.below";
-    return t(key, { delta, years: formatNumber(departure.years) });
-  };
+  const formatTempDelta = (celsius) =>
+    `${formatNumber(Math.abs(toDisplayTempDelta(celsius, settings.units)))}°`;
+
+  const departureLines = (departures = []) =>
+    departures
+      .filter((departure) => Math.abs(departure.delta) >= DEPARTURE.minDelta)
+      .map((departure) =>
+        t(`page.departure.${departure.variable}.${departure.delta > 0 ? "above" : "below"}`, {
+          delta: formatTempDelta(departure.delta),
+          years: formatNumber(departure.years),
+        }),
+      );
 
   const activityName = (id) => t(`activities.names.${id}`);
 
@@ -130,7 +143,8 @@ export const useFormat = () => {
     factText,
     factTone,
     factsFootnote,
-    departureText,
+    departureLines,
+    formatTempDelta,
     activityName,
     activityLabel,
     activityReason,

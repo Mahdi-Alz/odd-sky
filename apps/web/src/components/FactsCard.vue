@@ -6,7 +6,7 @@ import { useFormat } from "../composables/useFormat";
 
 defineProps({
   facts: { type: Object, required: true },
-  departure: { type: String, default: "" },
+  departures: { type: /** @type {import("vue").PropType<string[]>} */ (Array), default: () => [] },
 });
 
 const { t } = useI18n();
@@ -42,7 +42,9 @@ const { open: noteOpen, id: noteId, toggle: toggleNote, close: closeNote } = use
       </li>
     </ul>
 
-    <p v-if="departure" class="mt-3 text-sm text-white/75">{{ departure }}</p>
+    <ul v-if="departures.length" class="mt-3 space-y-0.5 text-sm text-white/75">
+      <li v-for="line in departures" :key="line">{{ line }}</li>
+    </ul>
 
     <Teleport to="body">
       <Transition name="toast">

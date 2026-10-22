@@ -17,6 +17,7 @@ export const FAMILY_WEIGHTS = {
   sky: 0.4,
   humidity: 0.3,
   "temperature-range": 0.3,
+  contrast: 0.9,
 };
 
 /** @type {import("../types.js").RecordDetectorConfig[]} */
@@ -179,8 +180,104 @@ export const DRY_DETECTORS = [
   },
 ];
 
+export const DAY_STATES = {
+  snowyFrom: 1,
+  rainyFrom: 2,
+  sunnyCloudMax: 30,
+  sunnySunshineMin: 6 * 3600,
+  sunnyPrecipMax: 0.5,
+  cloudyCloudMin: 80,
+};
+
+export const CONTRAST = {
+  id: "state-contrast",
+  family: "contrast",
+  lookbackYears: 3,
+  minRun: 2,
+  maxRun: 10,
+};
+
+export const LAST_YEAR = {
+  id: "tmax-last-year",
+  family: "day-temperature",
+  variable: /** @type {const} */ ("tmax"),
+  minDelta: 6,
+};
+
+/** @type {import("../types.js").RareDetectorConfig[]} */
+export const RARE_DETECTORS = [
+  {
+    id: "tmax-rare-high",
+    family: "day-temperature",
+    variable: "tmax",
+    direction: "high",
+    margin: 0.5,
+    maxCount: 3,
+    minYears: 20,
+    unit: "C",
+    messageKey: "facts.tmaxRareHigh",
+  },
+  {
+    id: "tmax-rare-low",
+    family: "day-temperature",
+    variable: "tmax",
+    direction: "low",
+    margin: 0.5,
+    maxCount: 3,
+    minYears: 20,
+    unit: "C",
+    messageKey: "facts.tmaxRareLow",
+  },
+  {
+    id: "tmin-rare-high",
+    family: "night-temperature",
+    variable: "tmin",
+    direction: "high",
+    margin: 0.5,
+    maxCount: 3,
+    minYears: 20,
+    unit: "C",
+    messageKey: "facts.tminRareHigh",
+  },
+  {
+    id: "tmin-rare-low",
+    family: "night-temperature",
+    variable: "tmin",
+    direction: "low",
+    margin: 0.5,
+    maxCount: 3,
+    minYears: 20,
+    unit: "C",
+    messageKey: "facts.tminRareLow",
+  },
+  {
+    id: "precip-rare-high",
+    family: "precipitation",
+    variable: "precip",
+    direction: "high",
+    margin: 1,
+    min: 2,
+    maxCount: 3,
+    minYears: 20,
+    unit: "mm",
+    messageKey: "facts.precipRareHigh",
+  },
+  {
+    id: "gust-rare-high",
+    family: "wind",
+    variable: "gustMax",
+    direction: "high",
+    margin: 3,
+    min: 35,
+    maxCount: 3,
+    minYears: 20,
+    unit: "km/h",
+    messageKey: "facts.gustRareHigh",
+  },
+];
+
 export const DEPARTURE = {
-  variable: "tmax",
+  variables: /** @type {const} */ (["tmax", "tmin"]),
   minYears: 10,
   minDelta: 1,
 };

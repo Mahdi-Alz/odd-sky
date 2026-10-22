@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ACTIVITIES, DETECTORS, LABEL_BOUNDS, weatherCodeList } from "@odd-sky/core";
+import { ACTIVITIES, DEPARTURE, DETECTORS, LABEL_BOUNDS, weatherCodeList } from "@odd-sky/core";
 import en from "./en.json";
 import fa from "./fa.json";
 
@@ -25,7 +25,6 @@ describe("messages", () => {
   it("has a message for every fact a detector can return", () => {
     for (const key of DETECTORS.flatMap((detector) => detector.messageKeys)) {
       for (const messages of [en, fa]) {
-        expect(lookup(messages, key)).toContain("{years}");
         expect(lookup(messages, key)).toContain("{date}");
       }
     }
@@ -38,7 +37,13 @@ describe("messages", () => {
       .filter(
         (key) =>
           !used.has(key) &&
-          !["facts.title", "facts.footnote", "facts.about", "facts.closeAbout"].includes(key),
+          ![
+            "facts.title",
+            "facts.footnote",
+            "facts.about",
+            "facts.closeAbout",
+            "facts.states",
+          ].includes(key),
       );
     expect(extra).toEqual([]);
   });
@@ -47,6 +52,22 @@ describe("messages", () => {
     const placeholders = (text) => (text.match(/\{\w+\}/g) ?? []).sort();
     for (const key of flatten(en)) {
       expect(placeholders(lookup(fa, key))).toEqual(placeholders(lookup(en, key)));
+    }
+  });
+
+  it("names every day state a contrast fact can use", () => {
+    for (const state of ["snowy", "rainy", "sunny", "cloudy"]) {
+      expect(en.facts.states[state]).toBeTruthy();
+      expect(fa.facts.states[state]).toBeTruthy();
+    }
+  });
+
+  it("names the high and low departure lines", () => {
+    for (const variable of DEPARTURE.variables) {
+      for (const side of ["above", "below"]) {
+        expect(lookup(en, `page.departure.${variable}.${side}`)).toContain("{delta}");
+        expect(lookup(fa, `page.departure.${variable}.${side}`)).toContain("{delta}");
+      }
     }
   });
 

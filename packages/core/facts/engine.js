@@ -26,7 +26,7 @@ export const scoreCandidate = (candidate) => {
   const familyWeight =
     FAMILY_WEIGHTS[/** @type {keyof typeof FAMILY_WEIGHTS} */ (candidate.family)] ?? 0;
   const score =
-    FACT_SCORING.rarityWeight * Math.log(candidate.years) +
+    FACT_SCORING.rarityWeight * Math.log(candidate.rarity ?? candidate.years) +
     FACT_SCORING.magnitudeWeight * candidate.magnitude +
     familyWeight;
   return {
@@ -66,24 +66,18 @@ export const selectFacts = (facts) => {
 /**
  * @param {import("../types.js").DayStats} today
  * @param {import("../types.js").DayStats[]} history
+ * @param {import("../types.js").FactVariable} variable
  * @returns {import("../types.js").Departure | null}
  */
-export const departureFor = (today, history) => {
-  const value = valueOf(
-    today,
-    /** @type {import("../types.js").FactVariable} */ (DEPARTURE.variable),
-  );
+export const departureFor = (today, history, variable) => {
+  const value = valueOf(today, variable);
   const values = /** @type {number[]} */ (
-    history
-      .map((day) =>
-        valueOf(day, /** @type {import("../types.js").FactVariable} */ (DEPARTURE.variable)),
-      )
-      .filter((v) => v !== null)
+    history.map((day) => valueOf(day, variable)).filter((v) => v !== null)
   );
   if (value === null || values.length < DEPARTURE.minYears) return null;
   const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
   return {
-    variable: DEPARTURE.variable,
+    variable,
     value: round1(value),
     mean: round1(mean),
     delta: round1(value - mean),
@@ -112,10 +106,16 @@ export const runFacts = ({
   const candidates = [];
   for (const detector of DETECTORS) {
     const candidate = detector.detect(corrected, history, ctx);
-    if (candidate && candidate.years >= FACT_SCORING.minYears) candidates.push(candidate);
+    if (candidate && (candidate.kind === "contrast" || candidate.years >= FACT_SCORING.minYears)) {
+      candidates.push(candidate);
+    }
   }
   return {
     facts: selectFacts(candidates.map(scoreCandidate)),
-    departure: departureFor(corrected, history),
+    departures: /** @type {import("../types.js").Departure[]} */ (
+      DEPARTURE.variables
+        .map((variable) => departureFor(corrected, history, variable))
+        .filter((departure) => departure !== null)
+    ),
   };
 };

@@ -24,7 +24,7 @@ export const RETRY = {
 };
 
 export const FACTS_CACHE = {
-  version: "v2",
+  version: "v3",
   maxTtlMs: 6 * 60 * 60 * 1000,
   partialTtlMs: 10 * 60 * 1000,
 };
