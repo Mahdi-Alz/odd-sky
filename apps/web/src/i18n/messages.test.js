@@ -24,8 +24,10 @@ describe("messages", () => {
 
   it("has a message for every fact a detector can return", () => {
     for (const key of DETECTORS.flatMap((detector) => detector.messageKeys)) {
-      expect(lookup(en, key)).toContain("{years}");
-      expect(lookup(fa, key)).toContain("{years}");
+      for (const messages of [en, fa]) {
+        expect(lookup(messages, key)).toContain("{years}");
+        expect(lookup(messages, key)).toContain("{date}");
+      }
     }
   });
 

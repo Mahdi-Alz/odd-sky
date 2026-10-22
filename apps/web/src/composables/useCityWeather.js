@@ -1,16 +1,22 @@
 import { reactive, watch } from "vue";
-import { HISTORY, locationKey, msUntilLocalMidnight } from "@odd-sky/core";
-import { FACTS_TTL_MS, PARTIAL_FACTS_TTL_MS } from "../config/refresh";
+import { HISTORY, localDateIn, locationKey, msUntilLocalMidnight } from "@odd-sky/core";
+import { FACTS_GRACE_MS, FACTS_TTL_MS, PARTIAL_FACTS_TTL_MS } from "../config/refresh";
 import { getFacts } from "../services/factsService";
 import { getForecast } from "../services/forecastService";
 import { cache } from "../storage";
 
 const forecastKey = (place) => `forecast:v4:${place.id}`;
 
+const factsKey = (place, localDate) => `facts:v3:${locationKey(place.lat, place.lon)}:${localDate}`;
+
+const cachedFacts = async (place) => {
+  const cached = await cache.get(factsKey(place, localDateIn(place.timezone)));
+  return cached?.data ?? null;
+};
+
 const loadFacts = async (place, state) => {
-  const { localDate, timezone } = state.forecast;
-  const key = `facts:v3:${locationKey(place.lat, place.lon)}:${localDate}`;
-  const cached = await cache.get(key);
+  const localDate = localDateIn(place.timezone);
+  const cached = await cache.get(factsKey(place, localDate));
   if (cached) {
     state.facts = cached.data;
     return;
@@ -18,16 +24,19 @@ const loadFacts = async (place, state) => {
   try {
     const facts = await getFacts(place);
     state.facts = facts;
-    const untilMidnight = msUntilLocalMidnight(timezone);
+    const untilMidnight = msUntilLocalMidnight(place.timezone);
     const ttl =
       facts.yearsAvailable < HISTORY.years
         ? Math.min(PARTIAL_FACTS_TTL_MS, untilMidnight)
         : Math.min(FACTS_TTL_MS, untilMidnight);
-    await cache.set(key, facts, ttl);
+    await cache.set(factsKey(place, facts.localDate), facts, ttl);
   } catch {
     if (state.facts?.localDate !== localDate) state.facts = null;
   }
 };
+
+const grace = (promise) =>
+  Promise.race([promise, new Promise((resolve) => setTimeout(resolve, FACTS_GRACE_MS))]);
 
 export const useCityWeather = (places) => {
   const states = reactive({});
@@ -45,19 +54,21 @@ export const useCityWeather = (places) => {
     });
     states[place.id] = state;
 
-    const cached = await cache.get(forecastKey(place));
+    const [cached, facts] = await Promise.all([cache.get(forecastKey(place)), cachedFacts(place)]);
     if (cached && !state.forecast && states[place.id] === state) {
+      state.facts = facts;
       state.forecast = cached.data;
       state.updatedAt = cached.savedAt;
       state.loading = false;
-      await loadFacts(place, state);
     }
   };
 
   const fetchFresh = async (place, state) => {
     state.refreshing = true;
+    const facts = loadFacts(place, state);
     try {
       const forecast = await getForecast(place);
+      if (!state.forecast) await grace(facts);
       state.forecast = forecast;
       state.error = false;
       state.updatedAt = Date.now();
@@ -67,7 +78,7 @@ export const useCityWeather = (places) => {
     }
     state.loading = false;
     state.refreshing = false;
-    if (state.forecast && states[place.id] === state) await loadFacts(place, state);
+    await facts;
   };
 
   const refresh = (place) => {

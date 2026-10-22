@@ -2,6 +2,12 @@ export const LIMITS = {
   perMinute: 500,
   perHour: 4000,
   perDay: 8000,
+  alertShare: 0.8,
+};
+
+export const RATE_LIMIT = {
+  requestsPerMinute: 60,
+  computesPerHour: 30,
 };
 
 export const INGEST = {

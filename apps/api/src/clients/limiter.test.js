@@ -11,7 +11,7 @@ describe("createLimiter", () => {
     const cache = createMemoryCache({ now: () => clock.time });
     const limiter = createLimiter({
       cache,
-      limits: { perMinute: 3, perHour: 100, perDay: 1000 },
+      limits: { perMinute: 3, perHour: 100, perDay: 1000, alertShare: 0.8 },
       now: () => clock.time,
     });
     await limiter.take(1.3);
@@ -30,10 +30,35 @@ describe("createLimiter", () => {
     const cache = createMemoryCache();
     const limiter = createLimiter({
       cache,
-      limits: { perMinute: 100, perHour: 100, perDay: 2 },
+      limits: { perMinute: 100, perHour: 100, perDay: 2, alertShare: 0.8 },
       now: () => start,
     });
     await limiter.take(2);
     await expect(limiter.take(0.5)).rejects.toBeInstanceOf(QuotaError);
+  });
+
+  it("alerts once a day when usage passes the alert share", async () => {
+    const clock = { time: start };
+    const cache = createMemoryCache({ now: () => clock.time });
+    /** @type {number[]} */
+    const alerts = [];
+    const limiter = createLimiter({
+      cache,
+      limits: { perMinute: 100, perHour: 100, perDay: 10, alertShare: 0.8 },
+      now: () => clock.time,
+      onAlert: ({ day }) => alerts.push(day),
+    });
+    for (let i = 0; i < 7; i += 1) await limiter.take(1);
+    expect(alerts).toEqual([]);
+    expect((await limiter.usage()).status).toBe("ok");
+    await limiter.take(1);
+    await limiter.take(1);
+    expect(alerts).toEqual([8]);
+    expect((await limiter.usage()).status).toBe("warn");
+    await limiter.take(1);
+    expect((await limiter.usage()).status).toBe("exhausted");
+    clock.time += 24 * 3600_000;
+    for (let i = 0; i < 8; i += 1) await limiter.take(1);
+    expect(alerts).toEqual([8, 8]);
   });
 });

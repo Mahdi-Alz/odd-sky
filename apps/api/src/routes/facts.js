@@ -9,10 +9,11 @@ import {
   runFacts,
   yearsAvailable,
 } from "@odd-sky/core";
-import { FACTS_CACHE } from "../config.js";
+import { FACTS_CACHE, RATE_LIMIT } from "../config.js";
 import { QuotaError } from "../errors.js";
 import { ingestHistory } from "../jobs/ingestHistory.js";
 import { refreshBias } from "../jobs/refreshBias.js";
+import { computeLimit, tooMany } from "../middleware/rateLimit.js";
 
 /** @param {string | undefined} value @param {number} limit */
 const coordinate = (value, limit) => {
@@ -49,6 +50,9 @@ export const factsRoute = (deps) => {
       c.header("cache-control", "private, no-cache");
       return c.json(cached);
     }
+
+    const budget = await computeLimit(deps, c, RATE_LIMIT.computesPerHour);
+    if (!budget.allowed) return tooMany(c, budget.retryAfterSeconds);
 
     const location = await deps.history.saveLocation({
       key,

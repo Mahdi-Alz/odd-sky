@@ -1,9 +1,11 @@
 <script setup>
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import DataCredit from "./DataCredit.vue";
 import SegmentedControl from "./SegmentedControl.vue";
 import SwitchRow from "./SwitchRow.vue";
 import UiIcon from "./UiIcon.vue";
+import { useFormat } from "../composables/useFormat";
 
 const props = defineProps({
   locale: { type: String, required: true },
@@ -14,6 +16,8 @@ const props = defineProps({
 const emit = defineEmits(["update:locale", "update:units", "set-activity", "copy-link", "close"]);
 
 const { t } = useI18n();
+const { formatYear } = useFormat();
+const copernicusYear = new Date().getFullYear();
 
 const localeOptions = [
   { value: "en", label: "English" },
@@ -96,18 +100,9 @@ const copyLabel = computed(() => {
 
       <section class="glass space-y-2 p-4 text-sm text-white/65">
         <h2 class="text-sm font-semibold text-white/80">{{ t("settings.about") }}</h2>
-        <p>
-          {{ t("app.dataBy") }}
-          <a
-            href="https://open-meteo.com/"
-            target="_blank"
-            rel="noopener"
-            class="underline underline-offset-2 hover:text-white"
-            >Open-Meteo</a
-          >
-          (CC BY 4.0)
-        </p>
+        <p><DataCredit /></p>
         <p>{{ t("settings.era5") }}</p>
+        <p>{{ t("settings.copernicus", { year: formatYear(copernicusYear) }) }}</p>
       </section>
     </div>
   </div>

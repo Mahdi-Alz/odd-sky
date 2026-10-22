@@ -36,10 +36,18 @@ export const createDeps = (env, overrides = {}) => {
     (config.redisUrl && config.redisToken
       ? createRedisCache({ url: config.redisUrl, token: config.redisToken })
       : createMemoryCache({ now }));
-  const limiter = overrides.limiter ?? createLimiter({ cache, limits: LIMITS, now });
+  const log = overrides.log ?? ((message, error) => console.error(message, error));
+  const limiter =
+    overrides.limiter ??
+    createLimiter({
+      cache,
+      limits: LIMITS,
+      now,
+      onAlert: ({ day, limit }) =>
+        log(`open-meteo quota alert: ${day.toFixed(1)} of ${limit} weighted calls used today`),
+    });
   const openMeteo =
     overrides.openMeteo ??
     createOpenMeteo({ fetch: overrides.fetch, limiter, config: config.openMeteo, sleep });
-  const log = overrides.log ?? ((message, error) => console.error(message, error));
   return { history, cache, limiter, openMeteo, now, sleep, log };
 };

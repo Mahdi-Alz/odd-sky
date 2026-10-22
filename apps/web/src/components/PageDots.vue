@@ -18,19 +18,23 @@ const asDots = computed(() => props.count <= MAX_DOTS);
 </script>
 
 <template>
-  <div v-if="count > 1" class="flex items-center justify-center gap-2" role="tablist">
+  <div v-if="count > 1" class="flex items-center justify-center" role="tablist">
     <template v-if="asDots">
       <button
         v-for="index in count"
         :key="index"
         type="button"
         role="tab"
-        class="size-2 rounded-full transition-all"
-        :class="index - 1 === active ? 'w-4 bg-white' : 'bg-white/40 hover:bg-white/70'"
+        class="group grid h-6 min-w-6 place-items-center"
         :aria-selected="index - 1 === active"
         :aria-label="t('pager.goTo', { n: formatNumber(index) })"
         @click="emit('select', index - 1)"
-      ></button>
+      >
+        <span
+          class="size-2 rounded-full transition-all"
+          :class="index - 1 === active ? 'w-4 bg-white' : 'bg-white/40 group-hover:bg-white/70'"
+        ></span>
+      </button>
     </template>
     <span v-else class="text-xs text-white/80" dir="ltr">
       {{ formatNumber(active + 1) }} / {{ formatNumber(count) }}

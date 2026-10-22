@@ -20,7 +20,10 @@ const setup = (/** @type {(url: URL, n: number) => Response} */ respond, env = {
   /** @type {number[]} */
   const sleeps = [];
   const cache = createMemoryCache();
-  const limiter = createLimiter({ cache, limits: { perMinute: 500, perHour: 4000, perDay: 8000 } });
+  const limiter = createLimiter({
+    cache,
+    limits: { perMinute: 500, perHour: 4000, perDay: 8000, alertShare: 0.8 },
+  });
   const client = createOpenMeteo({
     fetch: async (input) => {
       const url = new URL(String(input));

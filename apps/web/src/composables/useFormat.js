@@ -21,6 +21,9 @@ export const useFormat = () => {
 
   const formatNumber = (value) => numberFormat.value.format(Math.round(value) || 0);
 
+  const formatYear = (year) =>
+    new Intl.NumberFormat(settings.locale, { useGrouping: false }).format(year);
+
   const formatTempValue = (celsius) => formatNumber(toDisplayTemp(celsius, settings.units));
 
   const formatTemp = (celsius) => `${formatTempValue(celsius)}°`;
@@ -59,16 +62,19 @@ export const useFormat = () => {
       day: "numeric",
     });
 
-  const factText = (fact) =>
-    t(
-      fact.messageKey,
-      Object.fromEntries(
+  const factDate = (isoDate) =>
+    formatIsoDate(isoDate, settings.locale, { month: "long", day: "numeric" });
+
+  const factText = (fact, localDate) =>
+    t(fact.messageKey, {
+      ...Object.fromEntries(
         Object.entries(fact.params).map(([key, value]) => [
           key,
           typeof value === "number" ? formatNumber(value) : value,
         ]),
       ),
-    );
+      date: factDate(localDate),
+    });
 
   const listSeparator = computed(() => (settings.locale === "fa" ? "، " : ", "));
 
@@ -107,6 +113,7 @@ export const useFormat = () => {
 
   return {
     formatNumber,
+    formatYear,
     formatTemp,
     formatTempValue,
     tempUnit,

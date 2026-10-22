@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import { skyKey, weatherCode } from "@odd-sky/core";
 import ActivitiesCard from "./ActivitiesCard.vue";
 import DailyForecast from "./DailyForecast.vue";
+import DataCredit from "./DataCredit.vue";
 import DetailsGrid from "./DetailsGrid.vue";
 import FactsCard from "./FactsCard.vue";
 import HourlyStrip from "./HourlyStrip.vue";
@@ -34,12 +35,12 @@ const sky = computed(() =>
 );
 const today = computed(() => props.forecast?.daily[0] ?? null);
 const hourly = computed(() => props.forecast?.hourly ?? []);
-const hasFacts = computed(() => (props.facts?.facts.length ?? 0) > 0);
 const departure = computed(() =>
   props.facts && props.forecast?.localDate === props.facts.localDate
     ? departureText(props.facts.departure)
     : "",
 );
+const hasFacts = computed(() => (props.facts?.facts.length ?? 0) > 0 || Boolean(departure.value));
 </script>
 
 <template>
@@ -88,15 +89,15 @@ const departure = computed(() =>
               {{ t("page.low") }} <span dir="ltr">{{ formatTemp(today.min) }}</span>
             </span>
           </p>
-          <p v-if="departure" class="mt-1 text-sm text-white/70">{{ departure }}</p>
           <p v-if="error" class="mt-3 text-xs text-white/70">{{ t("status.stale") }}</p>
         </div>
 
-        <FactsCard v-if="hasFacts" :facts="facts" />
+        <FactsCard v-if="hasFacts" :facts="facts" :departure="departure" />
         <HourlyStrip v-if="hourly.length" :hourly="hourly" />
         <ActivitiesCard v-if="activityRows.length" :rows="activityRows" />
         <DailyForecast :daily="forecast.daily" />
         <DetailsGrid :current="forecast.current" />
+        <p class="text-center text-[11px] text-white/55"><DataCredit /></p>
       </template>
     </div>
   </section>
