@@ -48,17 +48,22 @@ useCityPager(container, activeIndex, count);
       <div class="pointer-events-auto">
         <slot name="above" />
       </div>
-      <div class="pointer-events-auto relative mx-auto flex min-h-10 max-w-2xl items-center justify-center px-4">
+      <div class="pointer-events-auto flex min-h-10 items-center justify-center px-4">
         <PageDots :count="count" :active="active" @select="emit('update:active', $event)" />
+      </div>
+    </nav>
+
+    <div class="safe-top pointer-events-none absolute inset-x-0 top-0">
+      <div class="mx-auto flex max-w-xl justify-end px-4 pt-7">
         <button
           type="button"
-          class="absolute end-4 grid size-10 place-items-center rounded-full bg-white/15 backdrop-blur-md hover:bg-white/25"
+          class="pointer-events-auto grid size-10 place-items-center rounded-full bg-white/15 backdrop-blur-md hover:bg-white/25"
           :aria-label="t('list.open')"
           @click="emit('open-list')"
         >
           <UiIcon name="list" class="size-5" />
         </button>
       </div>
-    </nav>
+    </div>
   </div>
 </template>
