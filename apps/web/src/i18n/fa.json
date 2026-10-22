@@ -75,7 +75,8 @@
     "snowFirstAll": "نخستین برفِ {date} در دست‌کم {years} سال گذشته",
     "rainFirst": "نخستین بارانِ {date} در {years} سال گذشته",
     "rainFirstAll": "نخستین بارانِ {date} در دست‌کم {years} سال گذشته",
-    "dryUnusual": "{date} معمولاً بارانی است ({rainy} سال از {years} سال)، اما امروز خشک است"
+    "dryUnusual": "{date} معمولاً بارانی است ({rainy} سال از {years} سال)، اما امروز خشک است",
+    "about": "دربارهٔ این مقایسه"
   },
   "activities": {
     "title": "فعالیت‌ها",

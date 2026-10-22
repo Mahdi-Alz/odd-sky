@@ -5,3 +5,5 @@ package-lock.json
 docs
 .claude
 CLAUDE.md
+.agents
+skills-lock.json

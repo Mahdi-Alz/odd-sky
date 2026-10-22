@@ -35,7 +35,9 @@ describe("messages", () => {
     const used = new Set(DETECTORS.flatMap((detector) => detector.messageKeys));
     const extra = Object.keys(en.facts)
       .map((key) => `facts.${key}`)
-      .filter((key) => !used.has(key) && !["facts.title", "facts.footnote"].includes(key));
+      .filter(
+        (key) => !used.has(key) && !["facts.title", "facts.footnote", "facts.about"].includes(key),
+      );
     expect(extra).toEqual([]);
   });
 

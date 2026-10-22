@@ -47,6 +47,10 @@ defineProps({
       <path d="M2 2l20 20" />
       <path d="M8.5 16.4a5 5 0 0 1 7 0M5 12.9a10 10 0 0 1 5.2-2.7M2 9a15 15 0 0 1 5-3M12 20h.01" />
     </template>
+    <template v-else-if="name === 'info'">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5M12 8h.01" />
+    </template>
     <template v-else-if="name === 'retry'">
       <path d="M21 12a9 9 0 1 1-3-6.7L21 8" />
       <path d="M21 3v5h-5" />
