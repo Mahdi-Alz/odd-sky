@@ -139,6 +139,18 @@
 }
 
 @layer components {
+  .toast-enter-active,
+  .toast-leave-active {
+    transition:
+      opacity var(--motion-move) ease-out,
+      transform var(--motion-move) ease-out;
+  }
+  .toast-enter-from,
+  .toast-leave-to {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+
   .list-enter-active,
   .list-leave-active {
     transition:

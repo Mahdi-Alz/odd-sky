@@ -76,7 +76,8 @@
     "rainFirst": "First rain on {date} in {years} years",
     "rainFirstAll": "First rain on {date} in at least {years} years",
     "dryUnusual": "{date} is usually wet (rain in {rainy} of {years} years), but dry today",
-    "about": "About this comparison"
+    "about": "About this comparison",
+    "closeAbout": "Close"
   },
   "activities": {
     "title": "Activities",

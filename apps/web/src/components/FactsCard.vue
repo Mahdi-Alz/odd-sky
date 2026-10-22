@@ -11,7 +11,7 @@ defineProps({
 
 const { t } = useI18n();
 const { factText, factTone, factsFootnote, formatFactsDate } = useFormat();
-const { open: noteOpen, id: noteId, toggle: toggleNote } = useDisclosure();
+const { open: noteOpen, id: noteId, toggle: toggleNote, close: closeNote } = useDisclosure();
 </script>
 
 <template>
@@ -44,12 +44,25 @@ const { open: noteOpen, id: noteId, toggle: toggleNote } = useDisclosure();
 
     <p v-if="departure" class="mt-3 text-sm text-white/75">{{ departure }}</p>
 
-    <p
-      v-show="noteOpen"
-      :id="noteId"
-      class="mt-3 rounded-xl bg-white/10 p-3 text-xs leading-snug text-white/75"
-    >
-      {{ factsFootnote(facts.yearsAvailable) }}
-    </p>
+    <Teleport to="body">
+      <Transition name="toast">
+        <div
+          v-if="noteOpen"
+          :id="noteId"
+          role="status"
+          class="glass fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-30 mx-auto flex max-w-md items-start gap-3 bg-black/70 p-4 text-sm leading-snug text-white/90 shadow-lg"
+        >
+          <p class="flex-1">{{ factsFootnote(facts.yearsAvailable) }}</p>
+          <button
+            type="button"
+            class="-me-2 -mt-2 grid size-8 shrink-0 place-items-center rounded-full text-white/70 hover:text-white"
+            :aria-label="t('facts.closeAbout')"
+            @click="closeNote"
+          >
+            <UiIcon name="close" class="size-4" />
+          </button>
+        </div>
+      </Transition>
+    </Teleport>
   </section>
 </template>

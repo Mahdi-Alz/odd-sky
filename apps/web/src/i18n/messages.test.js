@@ -36,7 +36,9 @@ describe("messages", () => {
     const extra = Object.keys(en.facts)
       .map((key) => `facts.${key}`)
       .filter(
-        (key) => !used.has(key) && !["facts.title", "facts.footnote", "facts.about"].includes(key),
+        (key) =>
+          !used.has(key) &&
+          !["facts.title", "facts.footnote", "facts.about", "facts.closeAbout"].includes(key),
       );
     expect(extra).toEqual([]);
   });
