@@ -50,7 +50,7 @@ const hasFacts = computed(() => (props.facts?.facts.length ?? 0) > 0 || Boolean(
     :aria-label="place.name"
   >
     <div class="safe-top mx-auto flex min-h-full max-w-xl flex-col gap-4 px-4 pb-32">
-      <header class="px-12 pt-8 text-center">
+      <header class="px-12 pt-3 text-center">
         <h1 class="text-3xl font-medium tracking-tight">{{ place.name }}</h1>
         <p class="mt-1 text-sm text-white/70">{{ placeDetail(place) }}</p>
         <p class="mt-0.5 text-xs text-white/60">{{ localTime }}</p>

@@ -47,7 +47,7 @@ const { draggingIndex, settling, onPointerDown, onKeyDown } = useDragReorder((fr
           </button>
           <button
             type="button"
-            class="grid size-10 place-items-center rounded-full bg-white/10 hover:bg-white/20"
+            class="grid size-10 place-items-center rounded-full bg-white/15 backdrop-blur-md hover:bg-white/25"
             :aria-label="t('settings.title')"
             @click="emit('open-settings')"
           >

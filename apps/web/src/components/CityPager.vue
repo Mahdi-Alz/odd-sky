@@ -54,7 +54,7 @@ useCityPager(container, activeIndex, count);
     </nav>
 
     <div class="safe-top pointer-events-none absolute inset-x-0 top-0">
-      <div class="mx-auto flex max-w-xl justify-end px-4 pt-7">
+      <div class="mx-auto flex max-w-xl justify-end px-4 pt-2">
         <button
           type="button"
           class="pointer-events-auto grid size-10 place-items-center rounded-full bg-white/15 backdrop-blur-md hover:bg-white/25"
